@@ -126,7 +126,6 @@ class _SignupViewState extends State<SignupView> {
                 bottom: 8.h,
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildField(
                     controller: controller,
@@ -135,7 +134,7 @@ class _SignupViewState extends State<SignupView> {
                     isPassword: false,
                     validator: controller.validateFullName,
                     textController: controller.fullNameController,
-                    contentPadding: EdgeInsets.only(top: 11.h),
+                    contentPadding: EdgeInsets.only(top: 9.h),
                   ),
                   _buildField(
                     controller: controller,
@@ -145,7 +144,7 @@ class _SignupViewState extends State<SignupView> {
                     isEmail: true,
                     validator: controller.validateEmail,
                     textController: controller.emailController,
-                    contentPadding: EdgeInsets.only(top: 3.h),
+                    contentPadding: EdgeInsets.only(top: 0.h),
                   ),
                   _buildField(
                     controller: controller,
@@ -155,7 +154,8 @@ class _SignupViewState extends State<SignupView> {
                     isPasswordField: true,
                     validator: controller.validatePassword,
                     textController: controller.passwordController,
-                    contentPadding: EdgeInsets.only(top: 3.h),
+                    contentPadding: EdgeInsets.only(top: 0.h),
+                    margin: EdgeInsets.only(bottom: -8.h),
                   ),
                   _buildField(
                     controller: controller,
@@ -165,7 +165,7 @@ class _SignupViewState extends State<SignupView> {
                     isConfirmPassword: true,
                     validator: controller.validateConfirmPassword,
                     textController: controller.confirmPasswordController,
-                    contentPadding: EdgeInsets.only(top: 3.h),
+                    contentPadding: EdgeInsets.only(top: 0.h),
                   ),
                 ],
               ),
@@ -187,62 +187,56 @@ class _SignupViewState extends State<SignupView> {
     required String? Function(String?) validator,
     required TextEditingController textController,
     EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? margin,
   }) {
-    return SizedBox(
-      height: 60.h,
-      child: Center(
+    return Container(
+      margin: margin,
+      child: SizedBox(
+        height: 44.h,
         child: TextFormField(
-          controller: textController,
-          validator: validator,
-          obscureText: isPasswordField
-              ? !controller.isPasswordVisible
-              : isConfirmPassword
-              ? !controller.isConfirmPasswordVisible
-              : false,
-          keyboardType: isEmail
-              ? TextInputType.emailAddress
-              : TextInputType.text,
-          style: TextStyle(
-            color: AppColors.textWhite,
+        controller: textController,
+        validator: validator,
+        obscureText: isPasswordField
+            ? !controller.isPasswordVisible
+            : isConfirmPassword
+            ? !controller.isConfirmPasswordVisible
+            : false,
+        keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+        style: TextStyle(
+          color: AppColors.textWhite,
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w400,
+        ),
+        cursorColor: AppColors.textWhite,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: AppColors.textWhite.withAlpha(120),
             fontSize: 16.sp,
             fontWeight: FontWeight.w400,
           ),
-          cursorColor: AppColors.textWhite,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: AppColors.textWhite.withAlpha(120),
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-            ),
-            suffixIcon: (isPasswordField || isConfirmPassword)
-                ? IconButton(
-                    onPressed: isPasswordField
-                        ? controller.togglePasswordVisibility
-                        : controller.toggleConfirmPasswordVisibility,
-                    icon: Icon(
-                      size: 24.h,
-                      (isPasswordField
-                              ? controller.isPasswordVisible
-                              : controller.isConfirmPasswordVisible)
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.textWhite.withAlpha(100),
-                    ),
-                  )
-                : (isEmail
-                      ? Icon(
-                          Icons.visibility_off_outlined,
-                          size: 24.h,
-                          color: AppColors.textWhite.withAlpha(100),
-                        )
-                      : null),
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            isDense: true,
-            contentPadding: contentPadding,
-          ),
+          suffixIcon: (isPasswordField || isConfirmPassword)
+              ? IconButton(
+                  onPressed: isPasswordField
+                      ? controller.togglePasswordVisibility
+                      : controller.toggleConfirmPasswordVisibility,
+                  icon: Icon(
+                    size: 24.h,
+                    (isPasswordField
+                            ? controller.isPasswordVisible
+                            : controller.isConfirmPasswordVisible)
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppColors.textWhite.withAlpha(100),
+                  ),
+                )
+              : null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          isDense: true,
+          contentPadding: contentPadding,
+        ),
         ),
       ),
     );
