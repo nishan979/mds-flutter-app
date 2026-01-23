@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../routes/app_pages.dart';
-import '../controllers/login_controller.dart';
+import '../controllers/signup_controller.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class SignupView extends StatefulWidget {
+  const SignupView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<SignupView> createState() => _SignupViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _SignupViewState extends State<SignupView> {
   @override
   void initState() {
     super.initState();
@@ -29,15 +28,13 @@ class _LoginViewState extends State<LoginView> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/login_page_bg.png',
+              'assets/images/signup_page_bg.png',
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(color: AppColors.backgroundDark);
+              },
             ),
           ),
-          // Positioned.fill(
-          //   child: Container(
-          //     color: AppColors.loginOverlay,
-          //   ),
-          // ),
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
@@ -48,62 +45,51 @@ class _LoginViewState extends State<LoginView> {
                       MediaQuery.of(context).padding.vertical -
                       40.h,
                 ),
-                child: GetBuilder<LoginController>(
+                child: GetBuilder<SignupController>(
                   builder: (controller) => Form(
                     key: controller.formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 300.h),
+                        SizedBox(height: 260.h),
                         _buildInputCard(controller),
-                        SizedBox(height: 4.h),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Forgot password?',
+                        SizedBox(height: 16.h),
+                        _buildImageButton(
+                          label: 'Sign Up',
+                          assetPath: 'assets/images/login_button_bg.png',
+                          onTap: controller.isLoading
+                              ? null
+                              : controller.signup,
+                          isLoading: controller.isLoading,
+                        ),
+                        SizedBox(height: 16.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Already have an account?',
                               style: TextStyle(
-                                color: Color.fromARGB(255, 129, 201, 210),
+                                color: Color(0xFF8b8b93),
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.25.sp,
                               ),
                             ),
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-                        _buildImageButton(
-                          label: 'Log In',
-                          assetPath: 'assets/images/login_button_bg.png',
-                          onTap: controller.isLoading ? null : controller.login,
-                          isLoading: controller.isLoading,
-                        ),
-
-                        Image.asset(
-                          'assets/images/or.png',
-                          width: double.infinity,
-                        ),
-
-                        _buildImageButton(
-                          label: 'Register',
-                          assetPath: 'assets/images/register_button_bg.png',
-                          onTap: () {
-                            Get.toNamed(Routes.SIGNUP);
-                          },
-                        ),
-                        SizedBox(height: 10.h),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Continue as Guest',
-                            style: TextStyle(
-                              color: Color(0xFF8b8b93),
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.40.sp,
+                            TextButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              child: Text(
+                                'Log In',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 129, 201, 210),
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.25.sp,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                         SizedBox(height: 40.h),
                       ],
@@ -118,62 +104,71 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildInputCard(LoginController controller) {
+  Widget _buildInputCard(SignupController controller) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/login_form_bg.png',
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(color: const Color(0xFF0c151e));
-              },
-            ),
+          Image.asset(
+            'assets/images/signup_form_bg.png',
+            fit: BoxFit.fitWidth,
+            alignment: Alignment.center,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(height: 240.h, color: const Color(0xFF0c151e));
+            },
           ),
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFF0d1620).withAlpha(20),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 54.w,
+                right: 20.w,
+                top: 8.h,
+                bottom: 8.h,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildField(
+                    controller: controller,
+                    hint: 'Full Name',
+                    icon: Icons.person_outline,
+                    isPassword: false,
+                    validator: controller.validateFullName,
+                    textController: controller.fullNameController,
+                    contentPadding: EdgeInsets.only(top: 11.h),
+                  ),
+                  _buildField(
+                    controller: controller,
+                    hint: 'Email',
+                    icon: Icons.mail_outline,
+                    isPassword: false,
+                    isEmail: true,
+                    validator: controller.validateEmail,
+                    textController: controller.emailController,
+                    contentPadding: EdgeInsets.only(top: 3.h),
+                  ),
+                  _buildField(
+                    controller: controller,
+                    hint: 'Password',
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    isPasswordField: true,
+                    validator: controller.validatePassword,
+                    textController: controller.passwordController,
+                    contentPadding: EdgeInsets.only(top: 3.h),
+                  ),
+                  _buildField(
+                    controller: controller,
+                    hint: 'Confirm Password',
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    isConfirmPassword: true,
+                    validator: controller.validateConfirmPassword,
+                    textController: controller.confirmPasswordController,
+                    contentPadding: EdgeInsets.only(top: 3.h),
                   ),
                 ],
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 54.w,
-              right: 20.w,
-              top: 8.h,
-              bottom: 8.h,
-            ),
-            child: Column(
-              children: [
-                _buildField(
-                  controller: controller,
-                  hint: 'Email',
-                  icon: Icons.mail_outline,
-                  isPassword: false,
-                  validator: controller.validateEmail,
-                  textController: controller.emailController,
-                  contentPadding: EdgeInsets.only(top: 11.h),
-                ),
-                _buildField(
-                  controller: controller,
-                  hint: 'Password',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                  validator: controller.validatePassword,
-                  textController: controller.passwordController,
-                  contentPadding: EdgeInsets.only(top: 3.h),
-                ),
-              ],
             ),
           ),
         ],
@@ -182,10 +177,13 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Widget _buildField({
-    required LoginController controller,
+    required SignupController controller,
     required String hint,
     required IconData icon,
     required bool isPassword,
+    bool isEmail = false,
+    bool isPasswordField = false,
+    bool isConfirmPassword = false,
     required String? Function(String?) validator,
     required TextEditingController textController,
     EdgeInsetsGeometry? contentPadding,
@@ -196,10 +194,14 @@ class _LoginViewState extends State<LoginView> {
         child: TextFormField(
           controller: textController,
           validator: validator,
-          obscureText: isPassword ? !controller.isPasswordVisible : false,
-          keyboardType: isPassword
-              ? TextInputType.text
-              : TextInputType.emailAddress,
+          obscureText: isPasswordField
+              ? !controller.isPasswordVisible
+              : isConfirmPassword
+              ? !controller.isConfirmPasswordVisible
+              : false,
+          keyboardType: isEmail
+              ? TextInputType.emailAddress
+              : TextInputType.text,
           style: TextStyle(
             color: AppColors.textWhite,
             fontSize: 16.sp,
@@ -213,18 +215,28 @@ class _LoginViewState extends State<LoginView> {
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
             ),
-            suffixIcon: isPassword
+            suffixIcon: (isPasswordField || isConfirmPassword)
                 ? IconButton(
-                    onPressed: controller.togglePasswordVisibility,
+                    onPressed: isPasswordField
+                        ? controller.togglePasswordVisibility
+                        : controller.toggleConfirmPasswordVisibility,
                     icon: Icon(
                       size: 24.h,
-                      controller.isPasswordVisible
+                      (isPasswordField
+                              ? controller.isPasswordVisible
+                              : controller.isConfirmPasswordVisible)
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                       color: AppColors.textWhite.withAlpha(100),
                     ),
                   )
-                : null,
+                : (isEmail
+                      ? Icon(
+                          Icons.visibility_off_outlined,
+                          size: 24.h,
+                          color: AppColors.textWhite.withAlpha(100),
+                        )
+                      : null),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -294,7 +306,7 @@ class _LoginViewState extends State<LoginView> {
                       label,
                       style: TextStyle(
                         color: AppColors.textWhite,
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
