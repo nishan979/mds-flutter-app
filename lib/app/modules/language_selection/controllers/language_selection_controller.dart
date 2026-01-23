@@ -28,7 +28,7 @@ class LanguageSelectionController extends GetxController {
     }
 
     // Save language preference (you can use GetStorage or SharedPreferences)
-    // For now, just navigate to home
-    Get.offAllNamed(Routes.HOME);
+    // For now, navigate to login
+    Get.offAllNamed(Routes.LOGIN);
   }
 }

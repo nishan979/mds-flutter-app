@@ -32,7 +32,6 @@ class SplashController extends GetxController {
         navigateToLanguageSelection();
       });
     } catch (error) {
-      print('Video initialization error: $error');
       // Navigate immediately if video fails
       Future.delayed(const Duration(seconds: 1), () {
         navigateToLanguageSelection();
