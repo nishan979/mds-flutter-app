@@ -22,78 +22,81 @@ class _SignupViewState extends State<SignupView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
+          // Fixed background image
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/signup_page_bg.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(color: AppColors.backgroundDark);
-              },
+            child: SizedBox.expand(
+              child: Image.asset(
+                'assets/images/background_image.png',
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(color: AppColors.backgroundDark);
+                },
+              ),
             ),
           ),
+          Positioned.fill(
+            child: Container(color: Color(0xFF02060e).withAlpha(150)),
+          ),
+          // Scrollable content on top
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight:
-                      MediaQuery.of(context).size.height -
-                      MediaQuery.of(context).padding.vertical -
-                      40.h,
-                ),
-                child: GetBuilder<SignupController>(
-                  builder: (controller) => Form(
-                    key: controller.formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 260.h),
-                        _buildInputCard(controller),
-                        SizedBox(height: 16.h),
-                        _buildImageButton(
-                          label: 'Sign Up',
-                          assetPath: 'assets/images/login_button_bg.png',
-                          onTap: controller.isLoading
-                              ? null
-                              : controller.signup,
-                          isLoading: controller.isLoading,
-                        ),
-                        SizedBox(height: 16.h),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Already have an account?',
+              child: GetBuilder<SignupController>(
+                builder: (controller) => Form(
+                  key: controller.formKey,
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/images/header_image2.png',
+                        width: double.infinity,
+                        fit: BoxFit.fitWidth,
+                        errorBuilder: (context, error, stackTrace) {
+                          return SizedBox(height: 240.h);
+                        },
+                      ),
+                      _buildInputCard(controller),
+                      SizedBox(height: 16.h),
+                      _buildImageButton(
+                        label: 'Sign Up',
+                        assetPath: 'assets/images/login_button_bg.png',
+                        onTap: controller.isLoading ? null : controller.signup,
+                        isLoading: controller.isLoading,
+                      ),
+                      SizedBox(height: 16.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Already have an account?',
+                            style: TextStyle(
+                              color: Color(0xFF8b8b93),
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0.25.sp,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: Text(
+                              'Log In',
                               style: TextStyle(
-                                color: Color(0xFF8b8b93),
+                                color: Color.fromARGB(255, 129, 201, 210),
                                 fontSize: 15.sp,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0.25.sp,
                               ),
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: Text(
-                                'Log In',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 129, 201, 210),
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.25.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 40.h),
+                    ],
                   ),
                 ),
               ),

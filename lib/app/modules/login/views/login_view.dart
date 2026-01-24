@@ -23,91 +23,92 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
+          // Fixed background image
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/login_page_bg.png',
-              fit: BoxFit.cover,
+            child: SizedBox.expand(
+              child: Image.asset(
+                'assets/images/background_image.png',
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(color: AppColors.backgroundDark);
+                },
+              ),
             ),
           ),
-          // Positioned.fill(
-          //   child: Container(
-          //     color: AppColors.loginOverlay,
-          //   ),
-          // ),
+          Positioned.fill(
+            child: Container(color: Color(0xFF02060e).withAlpha(150)),
+          ),
+          // Scrollable content on top
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight:
-                      MediaQuery.of(context).size.height -
-                      MediaQuery.of(context).padding.vertical -
-                      40.h,
-                ),
-                child: GetBuilder<LoginController>(
-                  builder: (controller) => Form(
-                    key: controller.formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 300.h),
-                        _buildInputCard(controller),
-                        SizedBox(height: 4.h),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Forgot password?',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 129, 201, 210),
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 0.25.sp,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-                        _buildImageButton(
-                          label: 'Log In',
-                          assetPath: 'assets/images/login_button_bg.png',
-                          onTap: controller.isLoading ? null : controller.login,
-                          isLoading: controller.isLoading,
-                        ),
-
-                        Image.asset(
-                          'assets/images/or.png',
-                          width: double.infinity,
-                        ),
-
-                        _buildImageButton(
-                          label: 'Register',
-                          assetPath: 'assets/images/register_button_bg.png',
-                          onTap: () {
-                            Get.toNamed(Routes.SIGNUP);
-                          },
-                        ),
-                        SizedBox(height: 10.h),
-                        TextButton(
+              child: GetBuilder<LoginController>(
+                builder: (controller) => Form(
+                  key: controller.formKey,
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/images/header_image2.png',
+                        width: double.infinity,
+                        fit: BoxFit.fitWidth,
+                        errorBuilder: (context, error, stackTrace) {
+                          return SizedBox(height: 240.h);
+                        },
+                      ),
+                      _buildInputCard(controller),
+                      SizedBox(height: 4.h),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
                           onPressed: () {},
                           child: Text(
-                            'Continue as Guest',
+                            'Forgot password?',
                             style: TextStyle(
-                              color: Color(0xFF8b8b93),
-                              fontSize: 17.sp,
+                              color: Color.fromARGB(255, 129, 201, 210),
+                              fontSize: 15.sp,
                               fontWeight: FontWeight.w400,
-                              letterSpacing: 0.40.sp,
+                              letterSpacing: 0.25.sp,
                             ),
                           ),
                         ),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 10.h),
+                      _buildImageButton(
+                        label: 'Log In',
+                        assetPath: 'assets/images/login_button_bg.png',
+                        onTap: controller.isLoading ? null : controller.login,
+                        isLoading: controller.isLoading,
+                      ),
+                      Image.asset(
+                        'assets/images/or.png',
+                        width: double.infinity,
+                      ),
+                      _buildImageButton(
+                        label: 'Register',
+                        assetPath: 'assets/images/register_button_bg.png',
+                        onTap: () {
+                          Get.toNamed(Routes.SIGNUP);
+                        },
+                      ),
+                      SizedBox(height: 10.h),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Continue as Guest',
+                          style: TextStyle(
+                            color: Color(0xFF8b8b93),
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.40.sp,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 40.h),
+                    ],
                   ),
                 ),
               ),

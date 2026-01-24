@@ -33,7 +33,9 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
               fit: BoxFit.cover,
             ),
           ),
-          Positioned.fill(child: Container(color: AppColors.loginOverlay)),
+          Positioned.fill(
+            child: Container(color: Color(0xFF02060e).withAlpha(150)),
+          ),
           SafeArea(
             child: Center(
               child: Padding(
@@ -50,7 +52,7 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
                     vertical: 22.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(18),
+                    color: Color(0xFF02060e).withAlpha(18),
                     borderRadius: BorderRadius.circular(18.r),
                     border: Border.all(color: Colors.white.withAlpha(38)),
                     boxShadow: [

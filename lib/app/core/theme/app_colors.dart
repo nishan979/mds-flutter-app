@@ -9,8 +9,12 @@ class AppColors {
 
   // Background Colors - Dark theme from login image
   static const Color backgroundDark = Color(0xFF0A1628); // Deep navy blue
+
   static const Color backgroundGradientStart = Color(0xFF1A2744);
   static const Color backgroundGradientEnd = Color(0xFF0A0E1A);
+
+  // ------------nishan----------------
+    static const Color backgroundChikichiki = Color(0xFF02060e);
 
   // Standard backgrounds
   static const Color background = Color(0xFFF5F5F5);
