@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../core/theme/app_colors.dart';
 
 enum SnackType { success, error, info }
 
@@ -16,16 +15,15 @@ void showAppSnack({
 
   switch (type) {
     case SnackType.success:
-      background = const Color(0xFF0b1321).withOpacity(0.95);
+      background = const Color(0xFF0b1321).withAlpha(243);
       icon = const Icon(Icons.check_circle, color: Colors.lightGreenAccent);
       break;
     case SnackType.error:
-      background = const Color(0xFF2b0b0b).withOpacity(0.95);
+      background = const Color(0xFF2b0b0b).withAlpha(243);
       icon = const Icon(Icons.error, color: Colors.redAccent);
       break;
     case SnackType.info:
-    default:
-      background = const Color(0xFF0b1321).withOpacity(0.9);
+      background = const Color(0xFF0b1321).withAlpha(243);
       icon = const Icon(Icons.info_outline, color: Colors.cyanAccent);
   }
 
