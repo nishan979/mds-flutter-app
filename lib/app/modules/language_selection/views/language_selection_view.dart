@@ -24,125 +24,202 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Select Your Language',
-                style: TextStyle(
-                  fontSize: 32.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+      backgroundColor: AppColors.backgroundDark,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/login_page_bg.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(child: Container(color: AppColors.loginOverlay)),
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 20.w,
+                  right: 20.w,
+                  top: 40.h,
+                  bottom: 40.h,
                 ),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                'Choose your preferred language to get started',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 60.h),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.greyLight, width: 2.w),
-                  borderRadius: BorderRadius.circular(12.r),
-                  color: AppColors.white,
-                ),
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  value: _selectedValue,
-                  hint: Row(
-                    children: [
-                      Text('🌍', style: TextStyle(fontSize: 24.sp)),
-                      SizedBox(width: 12.w),
-                      Text(
-                        'Select a language',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: AppColors.textHint,
-                        ),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 22.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(18),
+                    borderRadius: BorderRadius.circular(18.r),
+                    border: Border.all(color: Colors.white.withAlpha(38)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(89),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  items: _controller.languages
-                      .map(
-                        (language) => DropdownMenuItem<String>(
-                          value: language['code']!,
-                          child: Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Select Your Language',
+                        style: TextStyle(
+                          fontSize: 26.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textWhite,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Choose your preferred language to get started',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: AppColors.textWhite.withAlpha(204),
+                          height: 1.4,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(20),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: Colors.white.withAlpha(51)),
+                        ),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          dropdownColor: AppColors.backgroundDark,
+                          underline: const SizedBox(),
+                          value: _selectedValue,
+                          hint: Row(
                             children: [
-                              Text(
-                                language['flag']!,
-                                style: TextStyle(fontSize: 28.sp),
-                              ),
+                              Text('🌍', style: TextStyle(fontSize: 24.sp)),
                               SizedBox(width: 12.w),
                               Text(
-                                language['name']!,
+                                'Select a language',
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.textWhite.withAlpha(179),
                                 ),
                               ),
                             ],
                           ),
+                          items: _controller.languages
+                              .map(
+                                (language) => DropdownMenuItem<String>(
+                                  value: language['code']!,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        language['flag']!,
+                                        style: TextStyle(fontSize: 24.sp),
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Text(
+                                        language['name']!,
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          color: AppColors.textWhite,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedValue = value;
+                              });
+                              _controller.selectLanguage(value);
+                            }
+                          },
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.textWhite,
+                            size: 26.sp,
+                          ),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: AppColors.textWhite,
+                          ),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedValue = value;
-                      });
-                      _controller.selectLanguage(value);
-                    }
-                  },
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: AppColors.primary,
-                    size: 28.sp,
+                      ),
+                      SizedBox(height: 24.h),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: InkWell(
+                          onTap: _controller.continueToHome,
+                          borderRadius: BorderRadius.circular(12.r),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    child: Image.asset(
+                                      'assets/images/login_button_bg.png',
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    AppColors.secondary,
+                                                    AppColors.secondaryVariant,
+                                                  ],
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12.r),
+                                              ),
+                                            );
+                                          },
+                                    ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      color: Colors.black.withAlpha(25),
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Text(
+                                    'Continue',
+                                    style: TextStyle(
+                                      fontSize: 17.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textWhite,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.textPrimary,
-                  ),
-                  dropdownColor: AppColors.white,
                 ),
               ),
-              SizedBox(height: 80.h),
-              SizedBox(
-                width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: _controller.continueToHome,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

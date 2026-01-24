@@ -105,73 +105,66 @@ class _SignupViewState extends State<SignupView> {
   }
 
   Widget _buildInputCard(SignupController controller) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.r),
-      child: Stack(
-        children: [
-          Image.asset(
-            'assets/images/signup_form_bg.png',
-            fit: BoxFit.fitWidth,
-            alignment: Alignment.center,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(height: 240.h, color: const Color(0xFF0c151e));
-            },
-          ),
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 54.w,
-                right: 20.w,
-                top: 8.h,
-                bottom: 8.h,
-              ),
-              child: Column(
-                children: [
-                  _buildField(
-                    controller: controller,
-                    hint: 'Full Name',
-                    icon: Icons.person_outline,
-                    isPassword: false,
-                    validator: controller.validateFullName,
-                    textController: controller.fullNameController,
-                    contentPadding: EdgeInsets.only(top: 9.h),
-                  ),
-                  _buildField(
-                    controller: controller,
-                    hint: 'Email',
-                    icon: Icons.mail_outline,
-                    isPassword: false,
-                    isEmail: true,
-                    validator: controller.validateEmail,
-                    textController: controller.emailController,
-                    contentPadding: EdgeInsets.only(top: 0.h),
-                  ),
-                  _buildField(
-                    controller: controller,
-                    hint: 'Password',
-                    icon: Icons.lock_outline,
-                    isPassword: true,
-                    isPasswordField: true,
-                    validator: controller.validatePassword,
-                    textController: controller.passwordController,
-                    contentPadding: EdgeInsets.only(top: 0.h),
-                    margin: EdgeInsets.only(bottom: -8.h),
-                  ),
-                  _buildField(
-                    controller: controller,
-                    hint: 'Confirm Password',
-                    icon: Icons.lock_outline,
-                    isPassword: true,
-                    isConfirmPassword: true,
-                    validator: controller.validateConfirmPassword,
-                    textController: controller.confirmPasswordController,
-                    contentPadding: EdgeInsets.only(top: 0.h),
-                  ),
-                ],
+    return SizedBox(
+      height: 240.h,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/images/signup_form_bg.png',
+              fit: BoxFit.fitWidth,
+              alignment: Alignment.center,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(color: const Color(0xFF0c151e));
+              },
+            ),
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.only(left: 54.w, right: 20.w, top: 6.h),
+                child: Column(
+                  children: [
+                    _buildField(
+                      controller: controller,
+                      hint: 'Full Name',
+                      icon: Icons.person_outline,
+                      isPassword: false,
+                      validator: controller.validateFullName,
+                      textController: controller.fullNameController,
+                    ),
+                    _buildField(
+                      controller: controller,
+                      hint: 'Email',
+                      icon: Icons.mail_outline,
+                      isPassword: false,
+                      isEmail: true,
+                      validator: controller.validateEmail,
+                      textController: controller.emailController,
+                    ),
+                    _buildField(
+                      controller: controller,
+                      hint: 'Password',
+                      icon: Icons.lock_outline,
+                      isPassword: true,
+                      isPasswordField: true,
+                      validator: controller.validatePassword,
+                      textController: controller.passwordController,
+                    ),
+                    _buildField(
+                      controller: controller,
+                      hint: 'Confirm Password',
+                      icon: Icons.lock_outline,
+                      isPassword: true,
+                      isConfirmPassword: true,
+                      validator: controller.validateConfirmPassword,
+                      textController: controller.confirmPasswordController,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -192,51 +185,54 @@ class _SignupViewState extends State<SignupView> {
     return Container(
       margin: margin,
       child: SizedBox(
-        height: 44.h,
+        height: 46.h,
         child: TextFormField(
-        controller: textController,
-        validator: validator,
-        obscureText: isPasswordField
-            ? !controller.isPasswordVisible
-            : isConfirmPassword
-            ? !controller.isConfirmPasswordVisible
-            : false,
-        keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
-        style: TextStyle(
-          color: AppColors.textWhite,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
-        ),
-        cursorColor: AppColors.textWhite,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: AppColors.textWhite.withAlpha(120),
+          controller: textController,
+          validator: validator,
+          obscureText: isPasswordField
+              ? !controller.isPasswordVisible
+              : isConfirmPassword
+              ? !controller.isConfirmPasswordVisible
+              : false,
+          keyboardType: isEmail
+              ? TextInputType.emailAddress
+              : TextInputType.text,
+          style: TextStyle(
+            color: AppColors.textWhite,
             fontSize: 16.sp,
             fontWeight: FontWeight.w400,
           ),
-          suffixIcon: (isPasswordField || isConfirmPassword)
-              ? IconButton(
-                  onPressed: isPasswordField
-                      ? controller.togglePasswordVisibility
-                      : controller.toggleConfirmPasswordVisibility,
-                  icon: Icon(
-                    size: 24.h,
-                    (isPasswordField
-                            ? controller.isPasswordVisible
-                            : controller.isConfirmPasswordVisible)
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: AppColors.textWhite.withAlpha(100),
-                  ),
-                )
-              : null,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          isDense: true,
-          contentPadding: contentPadding,
-        ),
+          cursorColor: AppColors.textWhite,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: AppColors.textWhite.withAlpha(120),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+            ),
+            suffixIcon: (isPasswordField || isConfirmPassword)
+                ? IconButton(
+                    onPressed: isPasswordField
+                        ? controller.togglePasswordVisibility
+                        : controller.toggleConfirmPasswordVisibility,
+                    icon: Icon(
+                      size: 24.h,
+                      (isPasswordField
+                              ? controller.isPasswordVisible
+                              : controller.isConfirmPasswordVisible)
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.textWhite.withAlpha(100),
+                    ),
+                  )
+                : null,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            isDense: true,
+            contentPadding:
+                contentPadding ?? EdgeInsets.symmetric(vertical: 10.h),
+          ),
         ),
       ),
     );
