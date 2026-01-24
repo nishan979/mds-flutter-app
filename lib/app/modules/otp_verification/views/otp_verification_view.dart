@@ -1,25 +1,20 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../routes/app_pages.dart';
-import '../controllers/login_controller.dart';
+import '../controllers/otp_verification_controller.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class OtpVerificationView extends StatefulWidget {
+  const OtpVerificationView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<OtpVerificationView> createState() => _OtpVerificationViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class _OtpVerificationViewState extends State<OtpVerificationView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +22,6 @@ class _LoginViewState extends State<LoginView> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Fixed background image
           Positioned.fill(
             child: SizedBox.expand(
               child: Image.asset(
@@ -40,13 +34,12 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
           Positioned.fill(
-            child: Container(color: Color(0xFF02060e).withAlpha(150)),
+            child: Container(color: const Color(0xFF02060e).withAlpha(150)),
           ),
-          // Scrollable content on top
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: GetBuilder<LoginController>(
+              child: GetBuilder<OtpVerificationController>(
                 builder: (controller) => Form(
                   key: controller.formKey,
                   child: Column(
@@ -59,53 +52,27 @@ class _LoginViewState extends State<LoginView> {
                           return SizedBox(height: 240.h);
                         },
                       ),
+                      SizedBox(height: 20.h),
                       _buildInputCard(controller),
-                      SizedBox(height: 4.h),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            Get.toNamed(Routes.FORGET_PASSWORD);
-                          },
-                          child: Text(
-                            'Forgot password?',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 129, 201, 210),
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.25.sp,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 16.h),
                       _buildImageButton(
-                        label: 'Log In',
+                        label: 'Verify OTP',
                         assetPath: 'assets/images/login_button_bg.png',
-                        onTap: controller.isLoading ? null : controller.login,
+                        onTap: controller.isLoading
+                            ? null
+                            : controller.verifyOtp,
                         isLoading: controller.isLoading,
                       ),
-                      Image.asset(
-                        'assets/images/or.png',
-                        width: double.infinity,
-                      ),
-                      _buildImageButton(
-                        label: 'Register',
-                        assetPath: 'assets/images/register_button_bg.png',
-                        onTap: () {
-                          Get.toNamed(Routes.SIGNUP);
-                        },
-                      ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 12.h),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: controller.resendOtp,
                         child: Text(
-                          'Continue as Guest',
+                          'Resend OTP',
                           style: TextStyle(
-                            color: Color(0xFF8b8b93),
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 0.40.sp,
+                            color: const Color.fromARGB(255, 129, 201, 210),
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.25.sp,
                           ),
                         ),
                       ),
@@ -121,88 +88,74 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildInputCard(LoginController controller) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.r),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/login_form_bg.png',
-              fit: BoxFit.contain,
+  Widget _buildInputCard(OtpVerificationController controller) {
+    return SizedBox(
+      height: 140.h,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/images/otp_field.png',
+              fit: BoxFit.fitWidth,
               alignment: Alignment.center,
               errorBuilder: (context, error, stackTrace) {
                 return Container(color: const Color(0xFF0c151e));
               },
             ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFF0d1620).withAlpha(20),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.only(left: 54.w, right: 20.w, top: 6.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Enter the 6-digit code sent to your email',
+                      style: TextStyle(
+                        color: AppColors.textWhite.withAlpha(200),
+                        fontSize: 13.sp,
+                        height: 1.3,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    _buildField(
+                      controller: controller,
+                      hint: 'OTP Code',
+                      icon: Icons.lock_clock_outlined,
+                      validator: controller.validateOtp,
+                      textController: controller.otpController,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 54.w,
-              right: 20.w,
-              top: 8.h,
-              bottom: 8.h,
-            ),
-            child: Column(
-              children: [
-                _buildField(
-                  controller: controller,
-                  hint: 'Email',
-                  icon: Icons.mail_outline,
-                  isPassword: false,
-                  validator: controller.validateEmail,
-                  textController: controller.emailController,
-                  contentPadding: EdgeInsets.only(top: 11.h),
-                ),
-                _buildField(
-                  controller: controller,
-                  hint: 'Password',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                  validator: controller.validatePassword,
-                  textController: controller.passwordController,
-                  contentPadding: EdgeInsets.only(top: 3.h),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildField({
-    required LoginController controller,
+    required OtpVerificationController controller,
     required String hint,
     required IconData icon,
-    required bool isPassword,
     required String? Function(String?) validator,
     required TextEditingController textController,
     EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? margin,
   }) {
-    return SizedBox(
-      height: 60.h,
-      child: Center(
+    return Container(
+      margin: margin,
+      child: SizedBox(
+        height: 46.h,
         child: TextFormField(
           controller: textController,
           validator: validator,
-          obscureText: isPassword ? !controller.isPasswordVisible : false,
-          keyboardType: isPassword
-              ? TextInputType.text
-              : TextInputType.emailAddress,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
           style: TextStyle(
             color: AppColors.textWhite,
             fontSize: 16.sp,
@@ -216,23 +169,17 @@ class _LoginViewState extends State<LoginView> {
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
             ),
-            suffixIcon: isPassword
-                ? IconButton(
-                    onPressed: controller.togglePasswordVisibility,
-                    icon: Icon(
-                      size: 24.h,
-                      controller.isPasswordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.textWhite.withAlpha(100),
-                    ),
-                  )
-                : null,
+            suffixIcon: Icon(
+              icon,
+              size: 22.h,
+              color: AppColors.textWhite.withAlpha(100),
+            ),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
             isDense: true,
-            contentPadding: contentPadding,
+            contentPadding:
+                contentPadding ?? EdgeInsets.symmetric(vertical: 10.h),
           ),
         ),
       ),
@@ -297,7 +244,7 @@ class _LoginViewState extends State<LoginView> {
                       label,
                       style: TextStyle(
                         color: AppColors.textWhite,
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),

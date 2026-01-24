@@ -9,6 +9,8 @@ abstract class Routes {
   static const LANGUAGE_SELECTION = _Paths.LANGUAGE_SELECTION;
   static const LOGIN = _Paths.LOGIN;
   static const SIGNUP = _Paths.SIGNUP;
+  static const FORGET_PASSWORD = _Paths.FORGET_PASSWORD;
+  static const OTP_VERIFICATION = _Paths.OTP_VERIFICATION;
   static const HOME = _Paths.HOME;
 }
 
@@ -18,5 +20,7 @@ abstract class _Paths {
   static const LANGUAGE_SELECTION = '/language-selection';
   static const LOGIN = '/login';
   static const SIGNUP = '/signup';
+  static const FORGET_PASSWORD = '/forget-password';
+  static const OTP_VERIFICATION = '/otp-verification';
   static const HOME = '/home';
 }

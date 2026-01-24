@@ -12,6 +12,10 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/signup/bindings/signup_binding.dart';
 import '../modules/signup/views/signup_view.dart';
+import '../modules/forget_password/bindings/forget_password_binding.dart';
+import '../modules/forget_password/views/forget_password_view.dart';
+import '../modules/otp_verification/bindings/otp_verification_binding.dart';
+import '../modules/otp_verification/views/otp_verification_view.dart';
 
 part 'app_routes.dart';
 
@@ -44,6 +48,20 @@ class AppPages {
       name: _Paths.SIGNUP,
       page: () => const SignupView(),
       binding: SignupBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: _Paths.FORGET_PASSWORD,
+      page: () => const ForgetPasswordView(),
+      binding: ForgetPasswordBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: _Paths.OTP_VERIFICATION,
+      page: () => const OtpVerificationView(),
+      binding: OtpVerificationBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 600),
     ),

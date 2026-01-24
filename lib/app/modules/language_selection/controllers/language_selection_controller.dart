@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../widgets/app_snackbar.dart';
 import '../../../routes/app_pages.dart';
 
 class LanguageSelectionController extends GetxController {
@@ -19,10 +20,10 @@ class LanguageSelectionController extends GetxController {
 
   void continueToHome() {
     if (selectedLanguage.isEmpty) {
-      Get.snackbar(
-        'Language Required',
-        'Please select a language to continue',
-        snackPosition: SnackPosition.BOTTOM,
+      showAppSnack(
+        title: 'Language Required',
+        message: 'Please select a language to continue',
+        type: SnackType.error,
       );
       return;
     }
