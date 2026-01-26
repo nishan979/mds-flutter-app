@@ -37,6 +37,7 @@ dependencies:
   get: ^4.7.3
   flutter_screenutil: ^5.9.3
   video_player: ^2.10.1
+  easy_localization: ^3.0.7
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,7 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/videos/
+    - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

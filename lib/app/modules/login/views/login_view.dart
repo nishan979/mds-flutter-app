@@ -1,8 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/login_controller.dart';
@@ -68,7 +69,7 @@ class _LoginViewState extends State<LoginView> {
                             Get.toNamed(Routes.FORGET_PASSWORD);
                           },
                           child: Text(
-                            'Forgot password?',
+                            'forgot_password'.tr(),
                             style: TextStyle(
                               color: Color.fromARGB(255, 129, 201, 210),
                               fontSize: 15.sp,
@@ -80,7 +81,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       SizedBox(height: 10.h),
                       _buildImageButton(
-                        label: 'Log In',
+                        label: 'log_in'.tr(),
                         assetPath: 'assets/images/login_button_bg.png',
                         onTap: controller.isLoading ? null : controller.login,
                         isLoading: controller.isLoading,
@@ -90,7 +91,7 @@ class _LoginViewState extends State<LoginView> {
                         width: double.infinity,
                       ),
                       _buildImageButton(
-                        label: 'Register',
+                        label: 'register'.tr(),
                         assetPath: 'assets/images/register_button_bg.png',
                         onTap: () {
                           Get.toNamed(Routes.SIGNUP);
@@ -100,7 +101,7 @@ class _LoginViewState extends State<LoginView> {
                       TextButton(
                         onPressed: () {},
                         child: Text(
-                          'Continue as Guest',
+                          'continue_as_guest'.tr(),
                           style: TextStyle(
                             color: Color(0xFF8b8b93),
                             fontSize: 17.sp,
@@ -160,7 +161,7 @@ class _LoginViewState extends State<LoginView> {
               children: [
                 _buildField(
                   controller: controller,
-                  hint: 'Email',
+                  hint: 'email'.tr(),
                   icon: Icons.mail_outline,
                   isPassword: false,
                   validator: controller.validateEmail,
@@ -169,7 +170,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 _buildField(
                   controller: controller,
-                  hint: 'Password',
+                  hint: 'password'.tr(),
                   icon: Icons.lock_outline,
                   isPassword: true,
                   validator: controller.validatePassword,

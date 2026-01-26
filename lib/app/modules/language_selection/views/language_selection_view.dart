@@ -1,6 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import '../../../core/theme/app_colors.dart';
 import '../controllers/language_selection_controller.dart';
 
@@ -23,6 +24,13 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
 
   @override
   Widget build(BuildContext context) {
+    final previewLocale = _selectedValue != null
+        ? Locale(_selectedValue!)
+        : null;
+    final buttonLabel = previewLocale == null
+        ? 'continue'.tr()
+        : 'continue'.tr();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -78,7 +86,7 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Select Your Language',
+                          'select_language'.tr(),
                           style: TextStyle(
                             fontSize: 26.sp,
                             fontWeight: FontWeight.w700,
@@ -87,7 +95,7 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Choose your preferred language to get started',
+                          'choose_language'.tr(),
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.textWhite.withAlpha(204),
@@ -117,7 +125,7 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
                                 Text('🌍', style: TextStyle(fontSize: 24.sp)),
                                 SizedBox(width: 12.w),
                                 Text(
-                                  'Select a language',
+                                  'select_a_language'.tr(),
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     color: AppColors.textWhite.withAlpha(179),
@@ -219,7 +227,7 @@ class _LanguageSelectionViewState extends State<LanguageSelectionView> {
                                   ),
                                   Center(
                                     child: Text(
-                                      'Continue',
+                                      buttonLabel,
                                       style: TextStyle(
                                         fontSize: 17.sp,
                                         fontWeight: FontWeight.w700,

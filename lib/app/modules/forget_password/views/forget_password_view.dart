@@ -1,8 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import '../../../core/theme/app_colors.dart';
 import '../controllers/forget_password_controller.dart';
 
@@ -57,7 +58,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                       _buildInputCard(controller),
                       SizedBox(height: 16.h),
                       _buildImageButton(
-                        label: 'Send OTP',
+                        label: 'send_otp'.tr(),
                         assetPath: 'assets/images/login_button_bg.png',
                         onTap: controller.isLoading ? null : controller.sendOTP,
                         isLoading: controller.isLoading,
@@ -67,7 +68,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Remember your password?',
+                            'remember_password'.tr(),
                             style: TextStyle(
                               color: Color(0xFF8b8b93),
                               fontSize: 15.sp,
@@ -80,7 +81,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                               Get.back();
                             },
                             child: Text(
-                              'Log In',
+                              'log_in'.tr(),
                               style: TextStyle(
                                 color: Color.fromARGB(255, 129, 201, 210),
                                 fontSize: 15.sp,
@@ -125,7 +126,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                   children: [
                     _buildField(
                       controller: controller,
-                      hint: 'Email',
+                      hint: 'email'.tr(),
                       icon: Icons.mail_outline,
                       isEmail: true,
                       validator: controller.validateEmail,

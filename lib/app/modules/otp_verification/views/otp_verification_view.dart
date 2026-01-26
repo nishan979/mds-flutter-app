@@ -1,9 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import '../../../core/theme/app_colors.dart';
 import '../controllers/otp_verification_controller.dart';
 
@@ -56,7 +57,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                       _buildInputCard(controller),
                       SizedBox(height: 16.h),
                       _buildImageButton(
-                        label: 'Verify OTP',
+                        label: 'verify_otp'.tr(),
                         assetPath: 'assets/images/login_button_bg.png',
                         onTap: controller.isLoading
                             ? null
@@ -67,7 +68,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                       TextButton(
                         onPressed: controller.resendOtp,
                         child: Text(
-                          'Resend OTP',
+                          'resend_otp'.tr(),
                           style: TextStyle(
                             color: const Color.fromARGB(255, 129, 201, 210),
                             fontSize: 15.sp,
@@ -110,7 +111,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Enter the 6-digit code sent to your email',
+                      'enter_otp_code'.tr(),
                       style: TextStyle(
                         color: AppColors.textWhite.withAlpha(200),
                         fontSize: 13.sp,
@@ -120,7 +121,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                     SizedBox(height: 10.h),
                     _buildField(
                       controller: controller,
-                      hint: 'OTP Code',
+                      hint: 'otp_code'.tr(),
                       icon: Icons.lock_clock_outlined,
                       validator: controller.validateOtp,
                       textController: controller.otpController,

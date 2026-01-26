@@ -1,8 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
 import '../../../core/theme/app_colors.dart';
 import '../controllers/signup_controller.dart';
 
@@ -61,7 +62,7 @@ class _SignupViewState extends State<SignupView> {
                       _buildInputCard(controller),
                       SizedBox(height: 16.h),
                       _buildImageButton(
-                        label: 'Sign Up',
+                        label: 'sign_up'.tr(),
                         assetPath: 'assets/images/login_button_bg.png',
                         onTap: controller.isLoading ? null : controller.signup,
                         isLoading: controller.isLoading,
@@ -71,7 +72,7 @@ class _SignupViewState extends State<SignupView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Already have an account?',
+                            'already_have_account'.tr(),
                             style: TextStyle(
                               color: Color(0xFF8b8b93),
                               fontSize: 15.sp,
@@ -84,7 +85,7 @@ class _SignupViewState extends State<SignupView> {
                               Get.back();
                             },
                             child: Text(
-                              'Log In',
+                              'log_in'.tr(),
                               style: TextStyle(
                                 color: Color.fromARGB(255, 129, 201, 210),
                                 fontSize: 15.sp,
@@ -129,7 +130,7 @@ class _SignupViewState extends State<SignupView> {
                   children: [
                     _buildField(
                       controller: controller,
-                      hint: 'Full Name',
+                      hint: 'full_name'.tr(),
                       icon: Icons.person_outline,
                       isPassword: false,
                       validator: controller.validateFullName,
@@ -137,7 +138,7 @@ class _SignupViewState extends State<SignupView> {
                     ),
                     _buildField(
                       controller: controller,
-                      hint: 'Email',
+                      hint: 'email'.tr(),
                       icon: Icons.mail_outline,
                       isPassword: false,
                       isEmail: true,
@@ -146,7 +147,7 @@ class _SignupViewState extends State<SignupView> {
                     ),
                     _buildField(
                       controller: controller,
-                      hint: 'Password',
+                      hint: 'password'.tr(),
                       icon: Icons.lock_outline,
                       isPassword: true,
                       isPasswordField: true,
@@ -155,7 +156,7 @@ class _SignupViewState extends State<SignupView> {
                     ),
                     _buildField(
                       controller: controller,
-                      hint: 'Confirm Password',
+                      hint: 'confirm_password'.tr(),
                       icon: Icons.lock_outline,
                       isPassword: true,
                       isConfirmPassword: true,
