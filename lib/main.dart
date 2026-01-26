@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'app/routes/app_pages.dart';
 import 'app/services/api/api_client.dart';
 import 'app/services/api/auth_service.dart';
+import 'app/services/storage/storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,8 +13,19 @@ void main() async {
 
   // Initialize API Client
   Get.put<ApiClient>(ApiClient());
+
+  // Initialize storage
+  final storage = await Get.putAsync<StorageService>(
+    () => StorageService().init(),
+  );
+
   // Initialize Auth Service
   Get.put<AuthService>(AuthService());
+
+  // If token exists, set it to ApiClient so subsequent requests have header
+  if (storage.token != null) {
+    Get.find<ApiClient>().setAuthToken(storage.token!);
+  }
 
   runApp(
     EasyLocalization(

@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'api_constants.dart';
 import 'api_models.dart';
+import 'auth_service.dart';
+import '../storage/storage_service.dart';
 
 class ApiClient extends GetxService {
   late final GetConnect _getConnect;
@@ -52,15 +54,29 @@ class ApiClient extends GetxService {
     try {
       final url = '${_getConnect.httpClient.baseUrl}$endpoint';
       print('[API][GET] URL: $url');
-      print('[API][GET] Headers: ${headers ?? ApiConstants.defaultHeaders}');
+      final usedHeaders = headers ?? ApiConstants.defaultHeaders;
+      print('[API][GET] Headers: $usedHeaders');
 
-      final response = await _getConnect.get(
-        endpoint,
-        headers: headers ?? ApiConstants.defaultHeaders,
-      );
+      var response = await _getConnect.get(endpoint, headers: usedHeaders);
 
       print('[API][GET] Status: ${response.statusCode}');
       print('[API][GET] Body: ${response.bodyString}');
+
+      if (response.statusCode == 401) {
+        print('[API][GET] Received 401, attempting token refresh');
+        final auth = Get.find<AuthService>();
+        final refreshed = await auth.refreshToken();
+        if (refreshed) {
+          print('[API][GET] Refresh succeeded, retrying request');
+          usedHeaders['Authorization'] =
+              'Bearer ${Get.find<StorageService>().token}';
+          response = await _getConnect.get(endpoint, headers: usedHeaders);
+          print('[API][GET] Retry Status: ${response.statusCode}');
+          print('[API][GET] Retry Body: ${response.bodyString}');
+        } else {
+          print('[API][GET] Refresh failed');
+        }
+      }
 
       return _handleResponse<T>(response, converter);
     } catch (e, st) {
@@ -85,7 +101,7 @@ class ApiClient extends GetxService {
       print('[API][POST] Headers: $usedHeaders');
       print('[API][POST] Body: $encodedBody');
 
-      final response = await _getConnect.post(
+      var response = await _getConnect.post(
         endpoint,
         encodedBody, // Encode as JSON string
         headers: usedHeaders,
@@ -93,6 +109,28 @@ class ApiClient extends GetxService {
 
       print('[API][POST] Status: ${response.statusCode}');
       print('[API][POST] Body: ${response.bodyString}');
+
+      // handle 401 - try refresh once
+      if (response.statusCode == 401) {
+        print('[API][POST] Received 401, attempting token refresh');
+        final auth = Get.find<AuthService>();
+        final refreshed = await auth.refreshToken();
+        if (refreshed) {
+          print('[API][POST] Refresh succeeded, retrying request');
+          // update headers with new token
+          usedHeaders['Authorization'] =
+              'Bearer ${Get.find<StorageService>().token}';
+          response = await _getConnect.post(
+            endpoint,
+            encodedBody,
+            headers: usedHeaders,
+          );
+          print('[API][POST] Retry Status: ${response.statusCode}');
+          print('[API][POST] Retry Body: ${response.bodyString}');
+        } else {
+          print('[API][POST] Refresh failed');
+        }
+      }
 
       return _handleResponse<T>(response, converter);
     } catch (e, st) {

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import '../../../routes/app_pages.dart';
+import '../../../services/storage/storage_service.dart';
 
 class SplashController extends GetxController {
   late VideoPlayerController videoController;
@@ -28,8 +29,16 @@ class SplashController extends GetxController {
       final videoDuration = videoController.value.duration.inMilliseconds;
       final delayMs = videoDuration + 1000; // video duration + 1 second
 
-      Future.delayed(Duration(milliseconds: delayMs), () {
-        navigateToLanguageSelection();
+      Future.delayed(Duration(milliseconds: delayMs), () async {
+        // Check auth state
+        final storage = Get.find<StorageService>();
+        final token = storage.token;
+        if (token != null && token.isNotEmpty) {
+          // Token exists, go to home
+          Get.offAllNamed(Routes.HOME);
+        } else {
+          navigateToLanguageSelection();
+        }
       });
     } catch (error) {
       // Navigate immediately if video fails
@@ -40,7 +49,13 @@ class SplashController extends GetxController {
   }
 
   void navigateToLanguageSelection() {
-    Get.toNamed(Routes.LANGUAGE_SELECTION);
+    final storage = Get.find<StorageService>();
+    final token = storage.token;
+    if (token != null && token.isNotEmpty) {
+      Get.offAllNamed(Routes.HOME);
+    } else {
+      Get.toNamed(Routes.LANGUAGE_SELECTION);
+    }
   }
 
   @override

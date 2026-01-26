@@ -16,6 +16,8 @@ import '../modules/forget_password/bindings/forget_password_binding.dart';
 import '../modules/forget_password/views/forget_password_view.dart';
 import '../modules/otp_verification/bindings/otp_verification_binding.dart';
 import '../modules/otp_verification/views/otp_verification_view.dart';
+import '../modules/check_email/views/check_email_view.dart';
+import '../modules/check_email/bindings/check_email_binding.dart';
 
 part 'app_routes.dart';
 
@@ -64,6 +66,11 @@ class AppPages {
       binding: OtpVerificationBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: _Paths.CHECK_EMAIL,
+      page: () => CheckEmailView(email: Get.arguments ?? ''),
+      binding: CheckEmailBinding(),
     ),
     GetPage(
       name: _Paths.HOME,

@@ -64,7 +64,12 @@ class _SignupViewState extends State<SignupView> {
                       _buildImageButton(
                         label: 'sign_up'.tr(),
                         assetPath: 'assets/images/login_button_bg.png',
-                        onTap: controller.isLoading ? null : controller.signup,
+                        onTap: controller.isLoading
+                            ? null
+                            : () {
+                                print('[UI] Signup button tapped');
+                                controller.signup();
+                              },
                         isLoading: controller.isLoading,
                       ),
                       SizedBox(height: 16.h),

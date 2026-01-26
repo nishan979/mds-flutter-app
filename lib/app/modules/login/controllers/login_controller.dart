@@ -17,7 +17,7 @@ class LoginController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _authService = AuthService();
+    _authService = Get.find<AuthService>();
   }
 
   void togglePasswordVisibility() {
@@ -57,14 +57,20 @@ class LoginController extends GetxController {
       try {
         // Use a static device name as required by backend
         const deviceName = 'postman';
-        await _authService.login(
+        final resp = await _authService.login(
           email: emailController.text.trim(),
           password: passwordController.text,
           deviceName: deviceName,
         );
 
         isLoading.value = false;
-        Get.offAllNamed(Routes.HOME);
+        // If email is not verified, navigate to check email screen
+        if (resp.user.emailVerifiedAt == null ||
+            resp.user.emailVerifiedAt!.isEmpty) {
+          Get.offAllNamed('/check-email', arguments: resp.user.email);
+        } else {
+          Get.offAllNamed(Routes.HOME);
+        }
       } on ApiException catch (e) {
         isLoading.value = false;
         errorMessage.value = e.message;

@@ -22,7 +22,7 @@ class HomeController extends GetxController {
     } on ApiException catch (e) {
       showAppSnack(
         title: 'Logout failed',
-        message: e.message ?? 'Logout failed',
+        message: e.message,
         type: SnackType.error,
       );
     } catch (e) {

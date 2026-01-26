@@ -45,7 +45,7 @@ class ForgetPasswordController extends GetxController {
       } on ApiException catch (e) {
         showAppSnack(
           title: 'Error',
-          message: e.message ?? 'Unable to send reset link',
+          message: e.message,
           type: SnackType.error,
         );
       } catch (e) {

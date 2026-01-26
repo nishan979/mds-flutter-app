@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
+import '../../../services/api/auth_service.dart';
+import '../../../services/api/api_models.dart';
+import '../../../widgets/app_snackbar.dart';
 
 class SignupController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -64,18 +66,58 @@ class SignupController extends GetxController {
   }
 
   Future<void> signup() async {
+    print('[SIGNUP] signup() called');
     if (formKey.currentState!.validate()) {
+      print(
+        '[SIGNUP] form valid; name=${fullNameController.text}, email=${emailController.text}',
+      );
       isLoading = true;
       update();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      final auth = Get.find<AuthService>();
 
-      isLoading = false;
-      update();
+      try {
+        final response = await auth.register(
+          name: fullNameController.text.trim(),
+          email: emailController.text.trim(),
+          password: passwordController.text,
+          passwordConfirmation: confirmPasswordController.text,
+        );
 
-      // Navigate to home
-      Get.offAllNamed(Routes.HOME);
+        print('[SIGNUP] response: $response');
+
+        final message =
+            response['message'] ??
+            'Registration successful. Please verify your email.';
+        showAppSnack(
+          title: 'Success',
+          message: message,
+          type: SnackType.success,
+        );
+
+        // Navigate to check email screen so user can verify
+        print('[SIGNUP] navigating to CHECK EMAIL screen');
+        Get.offAllNamed(
+          '/check-email',
+          arguments: response['email'] ?? emailController.text.trim(),
+        );
+      } on ApiException catch (e) {
+        print('[SIGNUP] ApiException: ${e.message}');
+        showAppSnack(title: 'Error', message: e.message, type: SnackType.error);
+      } catch (e, st) {
+        print('[SIGNUP] Exception: $e');
+        print(st);
+        showAppSnack(
+          title: 'Error',
+          message: 'An unexpected error occurred',
+          type: SnackType.error,
+        );
+      } finally {
+        isLoading = false;
+        update();
+      }
+    } else {
+      print('[SIGNUP] form invalid');
     }
   }
 
