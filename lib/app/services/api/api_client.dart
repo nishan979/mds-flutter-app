@@ -207,14 +207,35 @@ class ApiClient extends GetxService {
         statusCode: response.statusCode,
       );
     } else {
-      final message =
-          (response.body is Map && (response.body as Map)['message'] != null)
-          ? (response.body as Map)['message']
-          : response.statusText ?? 'An error occurred';
+      // Try to extract a useful message and validation errors
+      String message = response.statusText ?? 'An error occurred';
+      final original = response.bodyString;
+      if (response.body is Map) {
+        final Map bodyMap = response.body as Map;
+        if (bodyMap['message'] != null) {
+          message = bodyMap['message'].toString();
+        }
+        // If there are validation errors, flatten them
+        if (bodyMap['errors'] != null && bodyMap['errors'] is Map) {
+          final Map errMap = bodyMap['errors'] as Map;
+          final List<String> parts = [];
+          errMap.forEach((key, val) {
+            try {
+              if (val is List && val.isNotEmpty) {
+                parts.add('$key: ${val.join(', ')}');
+              } else {
+                parts.add('$key: $val');
+              }
+            } catch (_) {}
+          });
+          if (parts.isNotEmpty) message = '$message\n${parts.join('\n')}';
+        }
+      }
+
       throw ApiException(
         message: message,
         statusCode: response.statusCode,
-        originalException: response.bodyString,
+        originalException: original,
       );
     }
   }
