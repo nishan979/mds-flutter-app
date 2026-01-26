@@ -3,10 +3,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'app/routes/app_pages.dart';
+import 'app/services/api/api_client.dart';
+import 'app/services/api/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  // Initialize API Client
+  Get.put<ApiClient>(ApiClient());
+  // Initialize Auth Service
+  Get.put<AuthService>(AuthService());
+
   runApp(
     EasyLocalization(
       supportedLocales: const [

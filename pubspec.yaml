@@ -38,6 +38,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   video_player: ^2.10.1
   easy_localization: ^3.0.7
+  device_info_plus: ^12.3.0
 
 dev_dependencies:
   flutter_test:

@@ -80,11 +80,15 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       SizedBox(height: 10.h),
-                      _buildImageButton(
-                        label: 'log_in'.tr(),
-                        assetPath: 'assets/images/login_button_bg.png',
-                        onTap: controller.isLoading ? null : controller.login,
-                        isLoading: controller.isLoading,
+                      Obx(
+                        () => _buildImageButton(
+                          label: 'log_in'.tr(),
+                          assetPath: 'assets/images/login_button_bg.png',
+                          onTap: controller.isLoading.value
+                              ? null
+                              : controller.login,
+                          isLoading: controller.isLoading.value,
+                        ),
                       ),
                       Image.asset(
                         'assets/images/or.png',
@@ -197,45 +201,69 @@ class _LoginViewState extends State<LoginView> {
     return SizedBox(
       height: 60.h,
       child: Center(
-        child: TextFormField(
-          controller: textController,
-          validator: validator,
-          obscureText: isPassword ? !controller.isPasswordVisible : false,
-          keyboardType: isPassword
-              ? TextInputType.text
-              : TextInputType.emailAddress,
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-          ),
-          cursorColor: AppColors.textWhite,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: AppColors.textWhite.withAlpha(120),
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-            ),
-            suffixIcon: isPassword
-                ? IconButton(
-                    onPressed: controller.togglePasswordVisibility,
-                    icon: Icon(
-                      size: 24.h,
-                      controller.isPasswordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.textWhite.withAlpha(100),
+        child: isPassword
+            ? Obx(
+                () => TextFormField(
+                  controller: textController,
+                  validator: validator,
+                  obscureText: !controller.isPasswordVisible.value,
+                  keyboardType: TextInputType.text,
+                  style: TextStyle(
+                    color: AppColors.textWhite,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  cursorColor: AppColors.textWhite,
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: TextStyle(
+                      color: AppColors.textWhite.withAlpha(120),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
                     ),
-                  )
-                : null,
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            isDense: true,
-            contentPadding: contentPadding,
-          ),
-        ),
+                    suffixIcon: IconButton(
+                      onPressed: controller.togglePasswordVisibility,
+                      icon: Icon(
+                        size: 24.h,
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AppColors.textWhite.withAlpha(100),
+                      ),
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: contentPadding,
+                  ),
+                ),
+              )
+            : TextFormField(
+                controller: textController,
+                validator: validator,
+                obscureText: false,
+                keyboardType: TextInputType.emailAddress,
+                style: TextStyle(
+                  color: AppColors.textWhite,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+                cursorColor: AppColors.textWhite,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: TextStyle(
+                    color: AppColors.textWhite.withAlpha(120),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  isDense: true,
+                  contentPadding: contentPadding,
+                ),
+              ),
       ),
     );
   }

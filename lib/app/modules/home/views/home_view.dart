@@ -42,8 +42,46 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('HomeView is working', style: TextStyle(fontSize: 20)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profile'),
+                subtitle: const Text('View or edit your profile (dummy)'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  // Dummy action for now
+                  showDialog<void>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Profile (Dummy)'),
+                      content: const Text(
+                        'This is a placeholder for the Profile screen.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Center(
+              child: Text(
+                'HomeView is working',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
