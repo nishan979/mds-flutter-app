@@ -178,14 +178,14 @@ class AuthService {
         'password': password,
         'device_name': deviceName,
       };
-      print('[LOGIN] Request body: ' + requestBody.toString());
+      print('[LOGIN] Request body: $requestBody');
       final response = await _apiClient.post<LoginResponse>(
         '/auth/login',
         body: requestBody,
         converter: (json) =>
             LoginResponse.fromJson(json as Map<String, dynamic>),
       );
-      print('[LOGIN] Response: ' + response.toString());
+      print('[LOGIN] Response: $response');
       if (response.success && response.data != null) {
         // Store token for future requests
         _apiClient.setAuthToken(response.data!.token);
@@ -227,8 +227,9 @@ class AuthService {
           // if data isn't typed, try map access
           try {
             final dyn = response.data as dynamic;
-            if (dyn['user'] != null)
+            if (dyn['user'] != null) {
               await storage.setUser(dyn['user'] as Map<String, dynamic>);
+            }
           } catch (_) {}
         }
         // schedule auto logout/expiry handling
@@ -252,7 +253,7 @@ class AuthService {
       await _apiClient.post<void>(
         '/auth/logout',
         body: {},
-        converter: (json) => null,
+        converter: (json) {},
       );
       _apiClient.clearAuthToken();
       final storage = Get.find<StorageService>();

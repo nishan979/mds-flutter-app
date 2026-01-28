@@ -11,10 +11,20 @@ class OtpVerificationController extends GetxController {
 
   String? validateOtp(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter the OTP';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter the OTP',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (value.length != 6) {
-      return 'OTP must be 6 digits';
+      showAppSnack(
+        title: 'Error',
+        message: 'OTP must be 6 digits',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }

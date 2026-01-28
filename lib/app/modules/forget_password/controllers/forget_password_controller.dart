@@ -15,10 +15,20 @@ class ForgetPasswordController extends GetxController {
   String? validateEmail(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) {
-      return 'Please enter your email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your email',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (!GetUtils.isEmail(trimmed)) {
-      return 'Please enter a valid email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter a valid email',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
@@ -43,11 +53,7 @@ class ForgetPasswordController extends GetxController {
         // Navigate back to login on success
         Get.offAllNamed(Routes.LOGIN);
       } on ApiException catch (e) {
-        showAppSnack(
-          title: 'Error',
-          message: e.message,
-          type: SnackType.error,
-        );
+        showAppSnack(title: 'Error', message: e.message, type: SnackType.error);
       } catch (e) {
         showAppSnack(
           title: 'Error',

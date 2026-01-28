@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mds/app/widgets/app_snackbar.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/api/auth_service.dart';
 import '../../../services/api/api_models.dart';
@@ -27,24 +28,43 @@ class LoginController extends GetxController {
   String? validateEmail(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) {
-      return 'Please enter your email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your email',
+        type: SnackType.error,
+      );
+      return null;
     }
-    // More robust email regex
     final emailRegex = RegExp(
       r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}',
     );
     if (!emailRegex.hasMatch(trimmed)) {
-      return 'Please enter a valid email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter a valid email',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your password',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      showAppSnack(
+        title: 'Error',
+        message: 'Password must be at least 6 characters',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }

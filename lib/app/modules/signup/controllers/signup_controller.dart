@@ -27,40 +27,80 @@ class SignupController extends GetxController {
 
   String? validateFullName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your full name';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your full name',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (value.length < 3) {
-      return 'Name must be at least 3 characters';
+      showAppSnack(
+        title: 'Error',
+        message: 'Name must be at least 3 characters',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your email',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Please enter a valid email';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter a valid email',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please enter your password',
+        type: SnackType.error,
+      );
+      return null;
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+    if (value.length < 8) {
+      showAppSnack(
+        title: 'Error',
+        message: 'Password must be at least 8 characters',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      showAppSnack(
+        title: 'Error',
+        message: 'Please confirm your password',
+        type: SnackType.error,
+      );
+      return null;
     }
     if (value != passwordController.text) {
-      return 'Passwords do not match';
+      showAppSnack(
+        title: 'Error',
+        message: 'Passwords do not match',
+        type: SnackType.error,
+      );
+      return null;
     }
     return null;
   }
