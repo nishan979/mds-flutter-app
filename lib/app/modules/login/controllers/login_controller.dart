@@ -93,10 +93,31 @@ class LoginController extends GetxController {
         }
       } on ApiException catch (e) {
         isLoading.value = false;
-        errorMessage.value = e.message;
+        String msg = e.message;
+        String title = 'Login Error';
+        // Check both the main message and any error details for credential errors
+        bool isCredentialError = false;
+        if (e.statusCode == 422) {
+          final lowerMsg = msg.toLowerCase();
+          if (lowerMsg.contains('credential') ||
+              lowerMsg.contains('incorrect')) {
+            isCredentialError = true;
+          } else if (e.originalException is String) {
+            final orig = e.originalException as String;
+            if (orig.toLowerCase().contains('credential') ||
+                orig.toLowerCase().contains('incorrect')) {
+              isCredentialError = true;
+            }
+          }
+        }
+        if (isCredentialError) {
+          msg = 'Email or password is incorrect.';
+          title = 'Incorrect Credentials';
+        }
+        errorMessage.value = msg;
         Get.snackbar(
-          'Login Error',
-          e.message,
+          title,
+          msg,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
