@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../../services/api/auth_service.dart';
+import '../../../services/api/api_models.dart';
 import '../../../widgets/app_snackbar.dart';
 
 class CheckEmailController extends GetxController {
@@ -19,6 +20,9 @@ class CheckEmailController extends GetxController {
         message: res['message'] ?? 'Verification sent',
         type: SnackType.success,
       );
+    } on ApiException catch (e) {
+      // Show server-provided message (like validation 422)
+      showAppSnack(title: 'Error', message: e.message, type: SnackType.error);
     } catch (e) {
       showAppSnack(
         title: 'Error',

@@ -1,9 +1,7 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
 import '../controllers/home_controller.dart';
 
 class HomeView extends StatefulWidget {
@@ -33,27 +31,27 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(90.h),
         child: SafeArea(
           child: Container(
-            height: 90,
+            height: 80.h,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.transparent,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
                   'assets/images/header_image.png',
-                  height: 48,
+                  height: 48.h,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -68,38 +66,39 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(width: 16),
                 CircleAvatar(
-                  radius: 22,
+                  radius: 22.r,
                   backgroundImage: NetworkImage(
                     'https://randomuser.me/api/portraits/men/1.jpg',
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Stack(
                   alignment: Alignment.topRight,
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.notifications,
                         color: Colors.white,
+                        size: 28.w,
                       ),
                       onPressed: () {},
                     ),
                     Positioned(
-                      right: 8,
-                      top: 8,
+                      right: 8.w,
+                      top: 8.h,
                       child: Container(
-                        width: 16,
-                        height: 16,
+                        width: 16.w,
+                        height: 16.h,
                         decoration: BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
                             '1',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: 10.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -107,6 +106,57 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   ],
+                ),
+                SizedBox(width: 8.w),
+                IconButton(
+                  icon: Icon(Icons.logout, color: Colors.white, size: 24.w),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(
+                          'Logout',
+                          style: TextStyle(fontSize: 18.sp),
+                        ),
+                        content: Text(
+                          'Are you sure you want to logout?',
+                          style: TextStyle(fontSize: 14.sp),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(
+                              'Logout',
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      // Delegate actual logout logic to HomeController (shows snackbars & navigates)
+                      try {
+                        final homeCtrl = Get.find<HomeController>();
+                        await homeCtrl.logout();
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Logout failed',
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
                 ),
               ],
             ),
@@ -123,7 +173,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           // Placeholder for selected tab
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(10.w),
             child: _tabPages[_selectedIndex],
           ),
           // Custom Glassmorphic Bottom Navbar
@@ -145,12 +195,12 @@ class _HomeViewState extends State<HomeView> {
 // Helper for color bar
 Widget _colorBar(Color color) {
   return Container(
-    width: 32,
-    height: 16,
-    margin: const EdgeInsets.symmetric(horizontal: 2),
+    width: 24.w,
+    height: 10.h,
+    margin: EdgeInsets.symmetric(horizontal: 1.5.w),
     decoration: BoxDecoration(
       color: color,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(2.r),
     ),
   );
 }
@@ -165,27 +215,27 @@ class _GlassNavbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32.r),
         child: Stack(
           alignment: Alignment.center,
           children: [
             Image.asset(
               'assets/images/background_navbar.png',
               fit: BoxFit.cover,
-              width: MediaQuery.of(context).size.width * 0.95,
-              height: 70,
+              width: 0.95.sw,
+              height: 70.h,
             ),
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.95,
-                height: 70,
+                width: 0.95.sw,
+                height: 70.h,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.13),
-                  borderRadius: BorderRadius.circular(32),
+                  color: Colors.white.withAlpha(33),
+                  borderRadius: BorderRadius.circular(32.r),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.18),
-                    width: 1.5,
+                    color: Colors.white.withAlpha(46),
+                    width: 1.5.w,
                   ),
                 ),
                 child: Row(
@@ -245,7 +295,7 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -253,20 +303,20 @@ class _NavBarItem extends StatelessWidget {
             Icon(
               icon,
               color: selected ? Colors.white : Colors.white70,
-              size: 28,
+              size: 28.w,
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               label,
               style: TextStyle(
                 color: selected ? Colors.white : Colors.white70,
                 fontWeight: FontWeight.w500,
-                fontSize: 15,
+                fontSize: 15.sp,
                 shadows: [
                   Shadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
+                    color: Colors.black.withAlpha(51),
+                    blurRadius: 2.r,
+                    offset: Offset(0, 1.h),
                   ),
                 ],
               ),
@@ -283,10 +333,10 @@ class _HomeTab extends StatelessWidget {
   const _HomeTab();
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
         'Home Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -296,10 +346,10 @@ class _ReportsTab extends StatelessWidget {
   const _ReportsTab();
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
         'Reports Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -309,10 +359,10 @@ class _ManageTab extends StatelessWidget {
   const _ManageTab();
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
         'Manage Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -322,10 +372,10 @@ class _MoreTab extends StatelessWidget {
   const _MoreTab();
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
         'More Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -335,10 +385,10 @@ class _NavBarDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 1,
-      height: 36,
-      color: Colors.white.withOpacity(0.18),
-      margin: const EdgeInsets.symmetric(horizontal: 2),
+      width: 1.w,
+      height: 36.h,
+      color: Colors.white.withAlpha(46),
+      margin: EdgeInsets.symmetric(horizontal: 2.w),
     );
   }
 }
