@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element
+// ignore_for_file: unused_element, unused_element_parameter
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -46,7 +46,7 @@ class _HomeViewState extends State<HomeView> {
                 bottomRight: Radius.circular(16),
               ),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 8.h),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -55,7 +55,7 @@ class _HomeViewState extends State<HomeView> {
                   height: 30.h,
                   fit: BoxFit.contain,
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 1.w),
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -68,14 +68,14 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 1.w),
                 CircleAvatar(
                   radius: 18.r,
                   backgroundImage: NetworkImage(
                     'https://randomuser.me/api/portraits/men/1.jpg',
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 1.w), // 8.w
                 Stack(
                   alignment: Alignment.topRight,
                   children: [
@@ -111,7 +111,7 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ],
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 1.w), // 8.w
                 IconButton(
                   icon: Icon(Icons.logout, color: Colors.white, size: 24.w),
                   onPressed: () async {
@@ -201,7 +201,7 @@ Widget _colorBar(Color color) {
   return Container(
     width: 24.w,
     height: 10.h,
-    margin: EdgeInsets.symmetric(horizontal: 1.5.w),
+    margin: EdgeInsets.symmetric(horizontal: 0.8.w),
     decoration: BoxDecoration(
       color: color,
       borderRadius: BorderRadius.circular(2.r),
@@ -277,6 +277,8 @@ class _NavBarItem extends StatelessWidget {
   const _NavBarItem({
     required this.icon,
     required this.label,
+    // ignore: duplicate_ignore
+    // ignore: unused_element_parameter
     this.selected = false,
     this.onTap,
   });
