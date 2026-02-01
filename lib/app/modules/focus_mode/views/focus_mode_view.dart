@@ -42,347 +42,442 @@ class FocusModeView extends GetView<FocusModeController> {
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               physics: BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      'Control your wins and success',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // A. Focus Status & Timer
-                  _SectionCard(
-                    title: 'Focus Status',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Obx(
-                              () => Text(
-                                controller.isFocusOn.value ? 'ACTIVE' : 'IDLE',
-                                style: TextStyle(
-                                  color: controller.isFocusOn.value
-                                      ? Colors.greenAccent
-                                      : Colors.white70,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18.sp,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Obx(
-                              () => Text(
-                                "Streak: ${controller.streak.value} Days",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12.sp,
-                                ),
-                              ),
-                            ),
-                          ],
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOut,
+                builder: (context, value, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: Opacity(opacity: value, child: child),
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Control your wins and success',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14.sp,
                         ),
-                        // Timer Display
-                        Obx(
-                          () => Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+
+                    // A. Focus Status & Timer
+                    _SectionCard(
+                      title: 'Focus Status',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                controller.formattedTime,
-                                style: TextStyle(
-                                  color: controller.isFocusOn.value
-                                      ? Colors.greenAccent
-                                      : Colors.white,
-                                  fontSize: 32.sp,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Courier',
+                              Obx(
+                                () => Text(
+                                  controller.isFocusOn.value
+                                      ? 'ACTIVE'
+                                      : 'IDLE',
+                                  style: TextStyle(
+                                    color: controller.isFocusOn.value
+                                        ? Colors.greenAccent
+                                        : Colors.white70,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.sp,
+                                  ),
                                 ),
                               ),
-                              Text(
-                                "Session Timer",
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 11.sp,
+                              SizedBox(height: 4.h),
+                              Obx(
+                                () => Text(
+                                  "Streak: ${controller.streak.value} Days",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Timer Display with Pulse
+                          Obx(
+                            () => Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _PulseTimer(
+                                  isRunning: controller.isFocusOn.value,
+                                  timeText: controller.formattedTime,
+                                ),
+                                Text(
+                                  "Session Timer",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 11.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // B. Focus Controls
+                    Text(
+                      "Focus Controls",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+
+                    // Interactive Start Button Card
+                    Obx(
+                      () => InkWell(
+                        onTap: controller.toggleFocusSession,
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
+                          ),
+                          margin: EdgeInsets.only(bottom: 8.h),
+                          decoration: BoxDecoration(
+                            color: controller.isFocusOn.value
+                                ? Colors.redAccent.withAlpha(50)
+                                : controller.activeConfig.value.themeColor
+                                      .withAlpha(50),
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: controller.isFocusOn.value
+                                  ? Colors.redAccent
+                                  : controller.activeConfig.value.themeColor,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                controller.isFocusOn.value
+                                    ? Icons.stop_circle
+                                    : Icons.play_circle_fill,
+                                color: controller.isFocusOn.value
+                                    ? Colors.redAccent
+                                    : controller.activeConfig.value.themeColor,
+                                size: 28.sp,
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: Text(
+                                  controller.isFocusOn.value
+                                      ? "Stop Focus Session"
+                                      : "Start Focus Session",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // B. Focus Controls
-                  Text(
-                    "Focus Controls",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-
-                  // Interactive Start Button Card
-                  Obx(
-                    () => InkWell(
-                      onTap: controller.toggleFocusSession,
-                      borderRadius: BorderRadius.circular(12.r),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 16.h,
-                        ),
-                        margin: EdgeInsets.only(bottom: 8.h),
-                        decoration: BoxDecoration(
-                          color: controller.isFocusOn.value
-                              ? Colors.redAccent.withAlpha(50)
-                              : Colors.blueAccent.withAlpha(50),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: controller.isFocusOn.value
-                                ? Colors.redAccent
-                                : Colors.blueAccent,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              controller.isFocusOn.value
-                                  ? Icons.stop_circle
-                                  : Icons.play_circle_fill,
-                              color: controller.isFocusOn.value
-                                  ? Colors.redAccent
-                                  : Colors.blueAccent,
-                              size: 28.sp,
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: Text(
-                                controller.isFocusOn.value
-                                    ? "Stop Focus Session"
-                                    : "Start Focus Session",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
-                  ),
 
-                  _ControlTile(
-                    icon: Icons.timer,
-                    title: "Set Focus Duration",
-                    color: Colors.orangeAccent,
-                    onTap: () {
-                      // Mock duration picker
-                      Get.defaultDialog(
-                        title: "Set Duration",
-                        titleStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        backgroundColor: Color(0xFF1a1a2e),
-                        content: Column(
-                          children: [
-                            ListTile(
-                              title: Text(
-                                "25 Minutes",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              onTap: () {
-                                controller.focusDuration.value = 25;
-                                controller.resetTimer();
-                                Get.back();
-                              },
-                            ),
-                            ListTile(
-                              title: Text(
-                                "45 Minutes",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              onTap: () {
-                                controller.focusDuration.value = 45;
-                                controller.resetTimer();
-                                Get.back();
-                              },
-                            ),
-                            ListTile(
-                              title: Text(
-                                "60 Minutes",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              onTap: () {
-                                controller.focusDuration.value = 60;
-                                controller.resetTimer();
-                                Get.back();
-                              },
-                            ),
-                          ],
-                        ),
-                        radius: 16.r,
-                      );
-                    },
-                  ),
-                  _ControlTile(
-                    icon: Icons.block,
-                    title: "Select Restricted Apps",
-                    color: Colors.purpleAccent,
-                    onTap: () {},
-                  ),
-                  _ControlTile(
-                    icon: Icons.notifications_off,
-                    title: "Silence Notifications",
-                    color: Colors.tealAccent,
-                    onTap: () {},
-                  ),
-
-                  SizedBox(height: 20.h),
-                  // C. Focus Presets
-                  Text(
-                    "Focus Presets",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Obx(
-                    () => Wrap(
-                      spacing: 10.w,
-                      runSpacing: 10.h,
-                      children: [
-                        _PresetChip(
-                          label: "Study Mode",
-                          selected:
-                              controller.presetSelected.value == "Study Mode",
-                          onTap: () => controller.selectPreset("Study Mode"),
-                        ),
-                        _PresetChip(
-                          label: "Work Mode",
-                          selected:
-                              controller.presetSelected.value == "Work Mode",
-                          onTap: () => controller.selectPreset("Work Mode"),
-                        ),
-                        _PresetChip(
-                          label: "Deep Focus",
-                          selected:
-                              controller.presetSelected.value == "Deep Focus",
-                          onTap: () => controller.selectPreset("Deep Focus"),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-                  // D. Behaviour Feedback
-                  _SectionCard(
-                    title: "Behaviour Feedback",
-                    child: Column(
-                      children: [
-                        _StatRow("Focus Impact on Score", "+12 pts"),
-                        _StatRow("Distraction Attempts", "4 Blocked"),
-                        Obx(
-                          () => _StatRow(
-                            "Time Focused Today",
-                            controller.timeFocusedToday.value,
+                    _ControlTile(
+                      icon: Icons.timer,
+                      title: "Set Focus Duration",
+                      color: Colors.orangeAccent,
+                      onTap: () {
+                        // Duration Picker
+                        Get.defaultDialog(
+                          title: "Set Duration",
+                          titleStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                      ],
+                          backgroundColor: Color(0xFF1a1a2e),
+                          content: Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  "25 Minutes",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                onTap: () {
+                                  controller.focusDuration.value = 25;
+                                  controller.resetTimer();
+                                  Get.back();
+                                },
+                              ),
+                              ListTile(
+                                title: Text(
+                                  "45 Minutes",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                onTap: () {
+                                  controller.focusDuration.value = 45;
+                                  controller.resetTimer();
+                                  Get.back();
+                                },
+                              ),
+                              ListTile(
+                                title: Text(
+                                  "60 Minutes",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                onTap: () {
+                                  controller.focusDuration.value = 60;
+                                  controller.resetTimer();
+                                  Get.back();
+                                },
+                              ),
+                            ],
+                          ),
+                          radius: 16.r,
+                        );
+                      },
                     ),
-                  ),
+                    _ControlTile(
+                      icon: Icons.block,
+                      title: "Select Restricted Apps",
+                      color: Colors.purpleAccent,
+                      onTap: () {},
+                    ),
+                    _ControlTile(
+                      icon: Icons.notifications_off,
+                      title: "Silence Notifications",
+                      color: Colors.tealAccent,
+                      onTap: () {},
+                    ),
 
-                  // Mock Rewards Panel ... (same as before)
-                  SizedBox(height: 20.h),
-                  Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFFFFD700).withAlpha(40),
-                          Color(0xFFFFA500).withAlpha(40),
+                    SizedBox(height: 20.h),
+                    // C. Focus Presets
+                    Text(
+                      "Focus Presets",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Obx(
+                      () => Wrap(
+                        spacing: 10.w,
+                        runSpacing: 10.h,
+                        children: [
+                          _PresetChip(
+                            label: "Study Mode",
+                            selected:
+                                controller.presetSelected.value == "Study Mode",
+                            onTap: () => controller.selectPreset("Study Mode"),
+                          ),
+                          _PresetChip(
+                            label: "Work Mode",
+                            selected:
+                                controller.presetSelected.value == "Work Mode",
+                            onTap: () => controller.selectPreset("Work Mode"),
+                          ),
+                          _PresetChip(
+                            label: "Deep Focus",
+                            selected:
+                                controller.presetSelected.value == "Deep Focus",
+                            onTap: () => controller.selectPreset("Deep Focus"),
+                          ),
+                          _PresetChip(
+                            label: "Creative Mode",
+                            selected:
+                                controller.presetSelected.value ==
+                                "Creative Mode",
+                            onTap: () =>
+                                controller.selectPreset("Creative Mode"),
+                          ),
+                          _PresetChip(
+                            label: "Detox Mode",
+                            selected:
+                                controller.presetSelected.value == "Detox Mode",
+                            onTap: () => controller.selectPreset("Detox Mode"),
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: Colors.amber.withAlpha(100)),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.emoji_events,
-                              color: Colors.amber,
-                              size: 28.sp,
-                            ),
-                            Text(
-                              "Rank: Master",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "250",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24.sp,
-                              ),
-                            ),
-                            Text(
-                              "Focus Points",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.local_fire_department,
-                              color: Colors.deepOrange,
-                              size: 28.sp,
-                            ),
-                            Text(
-                              "Badge: Laser",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  SizedBox(height: 40.h),
-                ],
+                    SizedBox(height: 20.h),
+                    // D. Behaviour Feedback
+                    _SectionCard(
+                      title: "Behaviour Feedback",
+                      child: Column(
+                        children: [
+                          _StatRow("Focus Impact on Score", "+12 pts"),
+                          _StatRow("Distraction Attempts", "4 Blocked"),
+                          Obx(
+                            () => _StatRow(
+                              "Time Focused Today",
+                              controller.timeFocusedToday.value,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Mock Rewards Panel ... (same as before)
+                    SizedBox(height: 20.h),
+                    Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFFFFD700).withAlpha(40),
+                            Color(0xFFFFA500).withAlpha(40),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: Colors.amber.withAlpha(100)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              Icon(
+                                Icons.emoji_events,
+                                color: Colors.amber,
+                                size: 28.sp,
+                              ),
+                              Text(
+                                "Rank: Master",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                "250",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24.sp,
+                                ),
+                              ),
+                              Text(
+                                "Focus Points",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Icon(
+                                Icons.local_fire_department,
+                                color: Colors.deepOrange,
+                                size: 28.sp,
+                              ),
+                              Text(
+                                "Badge: Laser",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 40.h),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PulseTimer extends StatefulWidget {
+  final bool isRunning;
+  final String timeText;
+  final Color color;
+  const _PulseTimer({
+    required this.isRunning,
+    required this.timeText,
+  });
+
+  @override
+  State<_PulseTimer> createState() => _PulseTimerState();
+}
+
+class _PulseTimerState extends State<_PulseTimer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void didUpdateWidget(covariant _PulseTimer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRunning && !oldWidget.isRunning) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.isRunning && oldWidget.isRunning) {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: widget.isRunning ? _scaleAnimation.value : 1.0,
+          child: Text(
+            widget.timeText,
+            style: TextStyle(
+              color: widget.isRunning ? Colors.greenAccent : Colors.white,
+              fontSize: 32.sp,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Courier',
+            ),
+          ),
+        );
+      },
     );
   }
 }

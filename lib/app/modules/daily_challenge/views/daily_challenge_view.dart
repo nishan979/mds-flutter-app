@@ -181,7 +181,7 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
                   SizedBox(height: 20.h),
                   // D. Completion System
                   Obx(
-                    () => Container(
+                    () => SizedBox(
                       width: double.infinity,
                       height: 50.h,
                       child: ElevatedButton(

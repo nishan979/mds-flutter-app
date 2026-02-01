@@ -39,150 +39,215 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
             ),
           ),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              physics: BouncingScrollPhysics(),
+            child: Obx(() {
+              if (!controller.hasTakenTest.value) {
+                return _buildEmptyState();
+              }
+              return _buildContent();
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 800),
+        builder: (context, value, child) =>
+            Opacity(opacity: value, child: child),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_outline, size: 64.w, color: Colors.white38),
+            SizedBox(height: 20.h),
+            Text(
+              "Recovery Plan Locked",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Text(
+              "Take the Anti-SMUB Test to generate your personalized recovery protocol.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+            ),
+            SizedBox(height: 30.h),
+            ElevatedButton(
+              onPressed: controller.completeTestMock, // Mock action
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                "Simulate Test Completion",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      physics: BouncingScrollPhysics(),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeOut,
+        builder: (context, value, child) {
+          return Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: Opacity(opacity: value, child: child),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Text(
+                'Where and why you fall short',
+                style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+              ),
+            ),
+            SizedBox(height: 20.h),
+
+            // A. Behaviour Diagnosis
+            _SectionHeader("Behaviour Diagnosis"),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(
+                  child: Obx(
+                    () => _AlertCard(
+                      "Weakness Zone",
+                      controller.weaknessZone.value,
+                      Colors.redAccent,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Obx(
+                    () => _AlertCard(
+                      "Failure Pattern",
+                      controller.failurePattern.value,
+                      Colors.orangeAccent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 24.h),
+            // B. Root Cause Mapping
+            _SectionCard(
+              title: "Root Cause Mapping & Triggers",
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Text(
-                      'Where and why you fall short',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // A. Behaviour Diagnosis
-                  _SectionHeader("Behaviour Diagnosis"),
-                  SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AlertCard(
-                          "Weakness Zone",
-                          "Late Night Scroll",
-                          Colors.redAccent,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _AlertCard(
-                          "Failure Pattern",
-                          "Stress -> TikTok",
-                          Colors.orangeAccent,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 24.h),
-                  // B. Root Cause Mapping
-                  _SectionCard(
-                    title: "Root Cause Mapping & Triggers",
-                    child: Column(
-                      children: [
-                        _TriggerRow("Emotional", "Loneliness / Boredom", 80),
-                        _TriggerRow("Situational", "Bedroom / 11 PM", 90),
-                        _TriggerRow("Digital", "Instagram Notification", 60),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 24.h),
-                  // C. Recovery Protocol
-                  _SectionCard(
-                    title: "Recovery Protocol",
-                    child: Column(
-                      children: [
-                        _ProtocolCheck("Trigger Interruption (Box Breathing)"),
-                        _ProtocolCheck("Loop Breaking (Walk outside)"),
-                        _ProtocolCheck("Journaling the urge"),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 24.h),
-                  // D. Relapse Prevention
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.redAccent),
-                      borderRadius: BorderRadius.circular(16.r),
-                      color: Colors.redAccent.withAlpha(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.redAccent,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              "Relapse Early Warning Signs",
-                              style: TextStyle(
-                                color: Colors.redAccent,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          "• Rationalizing 'just 5 minutes'",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                        Text(
-                          "• Skipping daily challenges",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                        Text(
-                          "• Leaving phone near sleep area",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 24.h),
-                  // E. Recovery Progress
-                  Text(
-                    "Recovery Progress",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _MetricColumn("Clean Streak", "12 Days", Colors.green),
-                      _MetricColumn("Stability", "84/100", Colors.blue),
-                      _MetricColumn("Risk Level", "Low", Colors.amber),
-                    ],
-                  ),
-
-                  SizedBox(height: 40.h),
+                  _TriggerRow("Emotional", "Loneliness / Boredom", 80),
+                  _TriggerRow("Situational", "Bedroom / 11 PM", 90),
+                  _TriggerRow("Digital", "Instagram Notification", 60),
                 ],
               ),
             ),
-          ),
-        ],
+
+            SizedBox(height: 24.h),
+            // C. Recovery Protocol
+            _SectionCard(
+              title: "Recovery Protocol",
+              child: Column(
+                children: [
+                  _ProtocolCheck("Trigger Interruption (Box Breathing)"),
+                  _ProtocolCheck("Loop Breaking (Walk outside)"),
+                  _ProtocolCheck("Journaling the urge"),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24.h),
+            // D. Relapse Prevention
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.redAccent),
+                borderRadius: BorderRadius.circular(16.r),
+                color: Colors.redAccent.withAlpha(20),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.redAccent,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        "Relapse Early Warning Signs",
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    "• Rationalizing 'just 5 minutes'",
+                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                  ),
+                  Text(
+                    "• Skipping daily challenges",
+                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                  ),
+                  Text(
+                    "• Leaving phone near sleep area",
+                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24.h),
+            // E. Recovery Progress
+            Text(
+              "Recovery Progress",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _MetricColumn("Clean Streak", "12 Days", Colors.green),
+                _MetricColumn("Stability", "84/100", Colors.blue),
+                _MetricColumn("Risk Level", "Low", Colors.amber),
+              ],
+            ),
+
+            SizedBox(height: 40.h),
+          ],
+        ),
       ),
     );
   }
