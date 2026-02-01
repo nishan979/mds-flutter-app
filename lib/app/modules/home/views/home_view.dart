@@ -1,10 +1,10 @@
 // ignore_for_file: unused_element, unused_element_parameter
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
+import '../../../routes/app_pages.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../services/storage/storage_service.dart';
 
@@ -118,27 +118,41 @@ class _HomeViewState extends State<HomeView> {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
+                        backgroundColor: Color(0xFF1a1a2e),
                         title: Text(
                           'Logout',
-                          style: TextStyle(fontSize: 18.sp),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         content: Text(
                           'Are you sure you want to logout?',
-                          style: TextStyle(fontSize: 14.sp),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.white70,
+                          ),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
                             child: Text(
                               'Cancel',
-                              style: TextStyle(fontSize: 14.sp),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
                             child: Text(
                               'Logout',
-                              style: TextStyle(fontSize: 14.sp),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.redAccent,
+                              ),
                             ),
                           ),
                         ],
@@ -150,13 +164,14 @@ class _HomeViewState extends State<HomeView> {
                         final homeCtrl = Get.find<HomeController>();
                         await homeCtrl.logout();
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Logout failed',
-                              style: TextStyle(fontSize: 14.sp),
-                            ),
-                          ),
+                        Get.snackbar(
+                          "Error",
+                          "Logout failed",
+                          backgroundColor: Colors.redAccent.withOpacity(0.8),
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                          margin: EdgeInsets.all(16),
+                          borderRadius: 12,
                         );
                       }
                     }
@@ -377,31 +392,41 @@ class _HomeTab extends StatelessWidget {
                   icon: Icons.school,
                   title: 'Take Anti-SMUB Test',
                   subtitle: 'Assess your digital dependency',
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed(Routes.ANTI_SMUB_TEST);
+                  },
                 ),
                 _FeatureCard(
                   icon: Icons.center_focus_strong,
                   title: 'Focus Mode',
                   subtitle: 'Control your wins and success',
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed(Routes.FOCUS_MODE);
+                  },
                 ),
                 _FeatureCard(
                   icon: Icons.flag,
                   title: 'Set Focus Goal',
                   subtitle: 'Start breaking free today',
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed(Routes.SET_FOCUS_GOAL);
+                  },
                 ),
                 _FeatureCard(
                   icon: Icons.emoji_events,
                   title: 'Daily Challenge',
                   subtitle: 'Improve your SMUB score',
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed(Routes.DAILY_CHALLENGE);
+                  },
                 ),
                 _FeatureCard(
                   icon: Icons.restore,
                   title: 'Recovery Task',
                   subtitle: 'Where and why you fall short',
-                  onTap: () {},
+                  onTap: () {
+                    Get.toNamed(Routes.RECOVERY_TASK);
+                  },
                 ),
                 SizedBox(height: 8.h),
               ],

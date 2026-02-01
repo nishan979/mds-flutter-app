@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'app/routes/app_pages.dart';
 import 'app/services/api/api_client.dart';
+import 'app/services/api/anti_smub_service.dart';
 import 'app/services/api/auth_service.dart';
 import 'app/services/storage/storage_service.dart';
 
@@ -21,6 +22,7 @@ void main() async {
 
   // Initialize Auth Service
   Get.put<AuthService>(AuthService());
+  Get.put<AntiSmubService>(AntiSmubService());
 
   // If token exists, set it to ApiClient so subsequent requests have header
   if (storage.token != null) {

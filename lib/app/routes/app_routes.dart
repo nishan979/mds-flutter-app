@@ -13,6 +13,12 @@ abstract class Routes {
   static const OTP_VERIFICATION = _Paths.OTP_VERIFICATION;
   static const CHECK_EMAIL = _Paths.CHECK_EMAIL;
   static const HOME = _Paths.HOME;
+  static const DASHBOARD = _Paths.DASHBOARD;
+  static const ANTI_SMUB_TEST = _Paths.ANTI_SMUB_TEST;
+  static const FOCUS_MODE = _Paths.FOCUS_MODE;
+  static const SET_FOCUS_GOAL = _Paths.SET_FOCUS_GOAL;
+  static const DAILY_CHALLENGE = _Paths.DAILY_CHALLENGE;
+  static const RECOVERY_TASK = _Paths.RECOVERY_TASK;
 }
 
 abstract class _Paths {
@@ -25,4 +31,10 @@ abstract class _Paths {
   static const OTP_VERIFICATION = '/otp-verification';
   static const CHECK_EMAIL = '/check-email';
   static const HOME = '/home';
+  static const DASHBOARD = '/dashboard';
+  static const ANTI_SMUB_TEST = '/anti-smub-test';
+  static const FOCUS_MODE = '/focus-mode';
+  static const SET_FOCUS_GOAL = '/set-focus-goal';
+  static const DAILY_CHALLENGE = '/daily-challenge';
+  static const RECOVERY_TASK = '/recovery-task';
 }
