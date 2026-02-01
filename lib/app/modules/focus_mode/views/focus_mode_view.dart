@@ -195,7 +195,13 @@ class FocusModeView extends GetView<FocusModeController> {
                       title: "Set Focus Duration",
                       color: Colors.orangeAccent,
                       onTap: () {
-                        // Duration Picker
+                        final uniqueDurations =
+                            controller.presetConfigs.values
+                                .map((e) => e.duration)
+                                .toSet()
+                                .toList()
+                              ..sort();
+
                         Get.defaultDialog(
                           title: "Set Duration",
                           titleStyle: TextStyle(
@@ -203,43 +209,22 @@ class FocusModeView extends GetView<FocusModeController> {
                             fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                           ),
-                          backgroundColor: Color(0xFF1a1a2e),
+                          backgroundColor: const Color(0xFF1a1a2e),
                           content: Column(
-                            children: [
-                              ListTile(
+                            mainAxisSize: MainAxisSize.min,
+                            children: uniqueDurations.map((minutes) {
+                              return ListTile(
                                 title: Text(
-                                  "25 Minutes",
-                                  style: TextStyle(color: Colors.white),
+                                  "$minutes Minutes",
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                                 onTap: () {
-                                  controller.focusDuration.value = 25;
+                                  controller.focusDuration.value = minutes;
                                   controller.resetTimer();
                                   Get.back();
                                 },
-                              ),
-                              ListTile(
-                                title: Text(
-                                  "45 Minutes",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onTap: () {
-                                  controller.focusDuration.value = 45;
-                                  controller.resetTimer();
-                                  Get.back();
-                                },
-                              ),
-                              ListTile(
-                                title: Text(
-                                  "60 Minutes",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onTap: () {
-                                  controller.focusDuration.value = 60;
-                                  controller.resetTimer();
-                                  Get.back();
-                                },
-                              ),
-                            ],
+                              );
+                            }).toList(),
                           ),
                           radius: 16.r,
                         );
@@ -249,13 +234,27 @@ class FocusModeView extends GetView<FocusModeController> {
                       icon: Icons.block,
                       title: "Select Restricted Apps",
                       color: Colors.purpleAccent,
-                      onTap: () {},
+                      onTap: _showRestrictedAppsSheet,
                     ),
-                    _ControlTile(
-                      icon: Icons.notifications_off,
-                      title: "Silence Notifications",
-                      color: Colors.tealAccent,
-                      onTap: () {},
+                    Obx(
+                      () => _ControlTile(
+                        icon: controller.isDndActive.value
+                            ? Icons.notifications_off
+                            : Icons.notifications_active,
+                        title: controller.isDndActive.value
+                            ? "Notifications Silenced"
+                            : "Silence Notifications",
+                        color: controller.isDndActive.value
+                            ? Colors.redAccent
+                            : Colors.tealAccent,
+                        onTap: controller.toggleDnd,
+                        trailing: Switch(
+                          value: controller.isDndActive.value,
+                          onChanged: (val) => controller.toggleDnd(),
+                          activeColor: Colors.tealAccent,
+                          inactiveTrackColor: Colors.white10,
+                        ),
+                      ),
                     ),
 
                     SizedBox(height: 20.h),
@@ -410,6 +409,68 @@ class FocusModeView extends GetView<FocusModeController> {
       ),
     );
   }
+
+  void _showRestrictedAppsSheet() {
+    Get.bottomSheet(
+      Container(
+        height: 500.h,
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1a1a2e),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          border: const Border(top: BorderSide(color: Colors.white24)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.white54,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              "Select Restricted Apps",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Expanded(
+              child: ListView.builder(
+                itemCount: controller.availableApps.length,
+                itemBuilder: (context, index) {
+                  final app = controller.availableApps[index];
+                  return Obx(
+                    () => ListTile(
+                      leading: const Icon(Icons.apps, color: Colors.white70),
+                      title: Text(
+                        app,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Checkbox(
+                        value: controller.restrictedApps.contains(app),
+                        onChanged: (val) => controller.toggleRestrictedApp(app),
+                        activeColor: Colors.purpleAccent,
+                        checkColor: Colors.white,
+                        side: const BorderSide(color: Colors.white54),
+                      ),
+                      onTap: () => controller.toggleRestrictedApp(app),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
 }
 
 class _PulseTimer extends StatefulWidget {
@@ -419,6 +480,7 @@ class _PulseTimer extends StatefulWidget {
   const _PulseTimer({
     required this.isRunning,
     required this.timeText,
+    this.color = Colors.greenAccent,
   });
 
   @override
@@ -525,7 +587,9 @@ class _ControlTile extends StatelessWidget {
     required this.title,
     required this.color,
     this.onTap,
+    this.trailing,
   });
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -551,7 +615,7 @@ class _ControlTile extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 14.sp),
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.white54),
+              trailing ?? Icon(Icons.chevron_right, color: Colors.white54),
             ],
           ),
         ),

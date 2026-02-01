@@ -41,6 +41,54 @@ class FocusModeController extends GetxController {
     icon: Icons.work,
   ).obs;
 
+  // Restricted Apps Mock Logic
+  final RxList<String> restrictedApps = <String>[].obs;
+  final RxBool isDndActive = false.obs; // Silence Notifications State
+
+  final List<String> availableApps = [
+    'Instagram',
+    'TikTok',
+    'YouTube',
+    'Facebook',
+    'Snapchat',
+    'Twitter',
+    'WhatsApp',
+    'Netflix',
+  ];
+
+  void toggleRestrictedApp(String appName) {
+    if (restrictedApps.contains(appName)) {
+      restrictedApps.remove(appName);
+    } else {
+      restrictedApps.add(appName);
+    }
+  }
+
+  void toggleDnd() {
+    isDndActive.value = !isDndActive.value;
+    if (isDndActive.value) {
+      Get.snackbar(
+        "DND Activated",
+        "Notifications are now silenced.",
+        backgroundColor: Colors.teal.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    } else {
+      Get.snackbar(
+        "DND Deactivated",
+        "You will receive notifications.",
+        backgroundColor: Colors.grey.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    }
+  }
+
   final Map<String, FocusPresetConfig> presetConfigs = {
     'Study Mode': FocusPresetConfig(
       label: 'Study Mode',

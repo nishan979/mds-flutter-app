@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../app/services/api/anti_smub_service.dart';
 import '../../../data/models/anti_smub_models.dart';
+import '../views/take_anti_smub_test_view.dart';
 
 class AntiSmubTestController extends GetxController {
   final AntiSmubService _antiSmubService = Get.find<AntiSmubService>();
@@ -9,6 +10,13 @@ class AntiSmubTestController extends GetxController {
   final RxList<SmubTest> tests = <SmubTest>[].obs;
   final RxBool isLoading = true.obs;
   final Rx<SmubSession?> activeSession = Rx<SmubSession?>(null);
+
+  // Test Progress State
+  final RxInt currentQuestionIndex = 0.obs;
+  final RxInt totalQuestions = 10.obs; // Mock total for now
+
+  double get progress =>
+      (currentQuestionIndex.value + 1) / totalQuestions.value;
 
   @override
   void onInit() {
@@ -71,7 +79,9 @@ class AntiSmubTestController extends GetxController {
             );
             if (session != null) {
               activeSession.value = session;
-              // Navigate to actual test screen (not implemented yet)
+              // Reset progress
+              currentQuestionIndex.value = 0;
+              Get.to(() => const TakeAntiSmubTestView());
               Get.snackbar(
                 "Success",
                 "Test started: ${test.title}",
