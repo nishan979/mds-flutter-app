@@ -109,6 +109,7 @@ class FocusModeView extends GetView<FocusModeController> {
                                 _PulseTimer(
                                   isRunning: controller.isFocusOn.value,
                                   timeText: controller.formattedTime,
+                                  color: Colors.greenAccent,
                                 ),
                                 Text(
                                   "Session Timer",
@@ -480,7 +481,7 @@ class _PulseTimer extends StatefulWidget {
   const _PulseTimer({
     required this.isRunning,
     required this.timeText,
-    this.color = Colors.greenAccent,
+    required this.color,
   });
 
   @override
@@ -532,7 +533,7 @@ class _PulseTimerState extends State<_PulseTimer>
           child: Text(
             widget.timeText,
             style: TextStyle(
-              color: widget.isRunning ? Colors.greenAccent : Colors.white,
+              color: widget.isRunning ? widget.color : Colors.white,
               fontSize: 32.sp,
               fontWeight: FontWeight.bold,
               fontFamily: 'Courier',
