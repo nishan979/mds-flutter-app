@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../app/services/api/anti_smub_service.dart';
 import '../../../data/models/anti_smub_models.dart';
 import '../views/take_anti_smub_test_view.dart';
+import '../views/full_assessment_details_view.dart';
 
 class AntiSmubTestController extends GetxController {
   final AntiSmubService _antiSmubService = Get.find<AntiSmubService>();
@@ -42,6 +43,25 @@ class AntiSmubTestController extends GetxController {
 
   // Called when user clicks one of the static tiles
   void onTileClicked(String typeKey) {
+    if (typeKey == 'full') {
+      Get.to(() => const FullAssessmentDetailsView());
+      return;
+    }
+
+    if (typeKey == 'start_full_test_now') {
+      final match = tests.firstWhereOrNull(
+        (t) =>
+            t.slug.toLowerCase().contains('full') ||
+            t.title.toLowerCase().contains('full'),
+      );
+      if (match != null) {
+        startTest(match);
+      } else {
+        Get.snackbar("Error", "Full assessment configuration not found.");
+      }
+      return;
+    }
+
     // We try to find a test that matches the type/slug
     // e.g. "quick", "full", "recovery", "focus"
     final match = tests.firstWhereOrNull(

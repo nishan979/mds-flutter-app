@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:get/get.dart';
+import '../views/restrict_apps_view.dart';
+import '../views/silence_notifications_view.dart';
+import '../views/set_focus_goal_view.dart';
+import '../views/edit_goal_view.dart';
 
 class FocusPresetConfig {
   final String label;
@@ -28,6 +32,29 @@ class FocusModeController extends GetxController {
   final RxInt streak = 5.obs; // Mock streak
   final RxString presetSelected = 'Work Mode'.obs;
 
+  // Goal Setting State
+  final RxString coreIdentity = "A successful entrepreneur".obs;
+  final RxString goalDescription =
+      "Build a thriving business and create financial freedom.".obs;
+  final RxString goalCategory = "Career".obs;
+  final RxString goalSubCategory = "Entrepreneurship".obs;
+  final RxBool goalSuccessCriteria = true.obs; // "I will succeed if..."
+
+  // Checkable Supporting Goals (Multi-select)
+  final RxList<String> activeSupportingGoals = <String>[
+    "Career",
+    "Health",
+    "Spiritual",
+  ].obs;
+
+  final List<String> availableSupportingGoals = [
+    "Academic",
+    "Career",
+    "Health",
+    "Spiritual",
+    "Personal Mastery",
+  ];
+
   // Track Time Focused
   final RxString timeFocusedToday = "45m".obs;
 
@@ -42,8 +69,24 @@ class FocusModeController extends GetxController {
   ).obs;
 
   // Restricted Apps Mock Logic
-  final RxList<String> restrictedApps = <String>[].obs;
-  final RxBool isDndActive = false.obs; // Silence Notifications State
+  final RxList<String> restrictedApps = <String>[
+    'YouTube',
+    'Facebook',
+    'Instagram',
+    'TikTok',
+    'Snapchat',
+    'Twitter',
+  ].obs;
+
+  final RxBool isDndActive =
+      false.obs; // Silence Notifications State (Toggle on main screen)
+
+  // Silenced Notifications List
+  final RxList<String> silencedNotifications = <String>[
+    'Social Apps',
+    'Email',
+    'Text Messages',
+  ].obs;
 
   final List<String> availableApps = [
     'Instagram',
@@ -54,6 +97,8 @@ class FocusModeController extends GetxController {
     'Twitter',
     'WhatsApp',
     'Netflix',
+    'Discord',
+    'Gaming',
   ];
 
   void toggleRestrictedApp(String appName) {
@@ -61,6 +106,14 @@ class FocusModeController extends GetxController {
       restrictedApps.remove(appName);
     } else {
       restrictedApps.add(appName);
+    }
+  }
+
+  void toggleSilencedNotification(String title) {
+    if (silencedNotifications.contains(title)) {
+      silencedNotifications.remove(title);
+    } else {
+      silencedNotifications.add(title);
     }
   }
 
@@ -86,6 +139,31 @@ class FocusModeController extends GetxController {
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
+    }
+  }
+
+  // Navigation
+  void navigateToRestrictApps() {
+    Get.to(() => const RestrictAppsView());
+  }
+
+  void navigateToSilenceNotifications() {
+    Get.to(() => const SilenceNotificationsView());
+  }
+
+  void navigateToSetFocusGoal() {
+    Get.to(() => const FocusSetGoalView());
+  }
+
+  void navigateToEditGoal() {
+    Get.to(() => const EditGoalView());
+  }
+
+  void toggleSupportingGoal(String goal) {
+    if (activeSupportingGoals.contains(goal)) {
+      activeSupportingGoals.remove(goal);
+    } else {
+      activeSupportingGoals.add(goal);
     }
   }
 
@@ -199,6 +277,64 @@ class FocusModeController extends GetxController {
   void resetTimer() {
     _stopTimer();
     remainingSeconds.value = focusDuration.value * 60;
+  }
+
+  void showDurationPicker() {
+    final uniqueDurations =
+        presetConfigs.values.map((e) => e.duration).toSet().toList()..sort();
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Color(0xFF1a1a2e),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white54,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Select Duration",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: uniqueDurations.map((minutes) {
+                return ActionChip(
+                  label: Text("$minutes min"),
+                  backgroundColor: focusDuration.value == minutes
+                      ? Colors.blueAccent
+                      : Colors.white10,
+                  labelStyle: const TextStyle(color: Colors.white),
+                  onPressed: () {
+                    focusDuration.value = minutes;
+                    resetTimer();
+                    Get.back();
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
   }
 
   void _finishSession() {
