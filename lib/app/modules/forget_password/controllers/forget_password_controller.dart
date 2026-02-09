@@ -44,32 +44,45 @@ class ForgetPasswordController extends GetxController {
         );
         final message = result['message'] ?? 'Reset link sent';
 
-        showAppSnack(
-          title: 'Success',
-          message: message,
-          type: SnackType.success,
+        // Reset loading and update UI to remove spinner before navigation
+        isLoading = false;
+        update();
+
+        // Use Get.snackbar directly instead of custom wrapper to avoid any controller references
+        Get.snackbar(
+          'Success',
+          message,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.all(16),
+          borderRadius: 12,
+          duration: Duration(seconds: 3),
         );
 
-        // Navigate back to login on success
+        // Navigate back to login
         Get.offAllNamed(Routes.LOGIN);
       } on ApiException catch (e) {
+        isLoading = false;
+        update();
         showAppSnack(title: 'Error', message: e.message, type: SnackType.error);
       } catch (e) {
+        isLoading = false;
+        update();
         showAppSnack(
           title: 'Error',
           message: 'An unexpected error occurred',
           type: SnackType.error,
         );
-      } finally {
-        isLoading = false;
-        update();
       }
     }
   }
 
   @override
   void onClose() {
-    emailController.dispose();
+    // Avoid disposing controllers here to prevent reuse-after-dispose
+    // if the controller instance is reused during navigation.
+    // emailController.dispose();
     super.onClose();
   }
 }
