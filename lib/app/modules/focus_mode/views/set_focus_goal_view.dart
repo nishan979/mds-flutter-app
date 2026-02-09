@@ -463,10 +463,10 @@ class FocusSetGoalView extends GetView<FocusModeController> {
               TextButton(
                 onPressed: () {
                   final val = _textController.text.trim();
+                  Get.back();
                   if (val.isNotEmpty) {
                     controller.addCustomSupportingGoal(val);
                   }
-                  Get.back();
                 },
                 child: const Text('Add', style: TextStyle(color: Colors.white)),
               ),

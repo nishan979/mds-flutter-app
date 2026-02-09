@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -12,22 +13,39 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+        leading: TextButton.icon(
           onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Behavioural Recovery Lab',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white70, size: 16.sp),
+          label: Text(
+            "Back",
+            style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+          ),
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            alignment: Alignment.centerLeft,
           ),
         ),
-        centerTitle: true,
+        leadingWidth: 80.w,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Container(
+            margin: EdgeInsets.only(right: 16.w),
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
+              color: Colors.black26,
+            ),
+            child: Text(
+              "52",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -38,400 +56,175 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
               fit: BoxFit.cover,
             ),
           ),
+
           SafeArea(
-            child: Obx(() {
-              if (!controller.hasTakenTest.value) {
-                return _buildEmptyState();
-              }
-              return _buildContent();
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 800),
-        builder: (context, value, child) =>
-            Opacity(opacity: value, child: child),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock_outline, size: 64.w, color: Colors.white38),
-            SizedBox(height: 20.h),
-            Text(
-              "Recovery Plan Locked",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            Text(
-              "Take the Anti-SMUB Test to generate your personalized recovery protocol.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-            ),
-            SizedBox(height: 30.h),
-            ElevatedButton(
-              onPressed: controller.completeTestMock, // Mock action
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Text(
-                "Simulate Test Completion",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      physics: BouncingScrollPhysics(),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.easeOut,
-        builder: (context, value, child) {
-          return Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: Opacity(opacity: value, child: child),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Text(
-                'Where and why you fall short',
-                style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-              ),
-            ),
-            SizedBox(height: 20.h),
-
-            // A. Behaviour Diagnosis
-            _SectionHeader("Behaviour Diagnosis"),
-            SizedBox(height: 10.h),
-            Row(
-              children: [
-                Expanded(
-                  child: Obx(
-                    () => _AlertCard(
-                      "Weakness Zone",
-                      controller.weaknessZone.value,
-                      Colors.redAccent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Recovery Task",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          "Refocus your mind and regain your productivity",
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Obx(
-                    () => _AlertCard(
-                      "Failure Pattern",
-                      controller.failurePattern.value,
-                      Colors.orangeAccent,
+
+                  SizedBox(height: 30.h),
+
+                  // Date Pill
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 8.h,
                     ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 24.h),
-            // B. Root Cause Mapping
-            _SectionCard(
-              title: "Root Cause Mapping & Triggers",
-              child: Column(
-                children: [
-                  _TriggerRow("Emotional", "Loneliness / Boredom", 80),
-                  _TriggerRow("Situational", "Bedroom / 11 PM", 90),
-                  _TriggerRow("Digital", "Instagram Notification", 60),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-            // C. Recovery Protocol
-            _SectionCard(
-              title: "Recovery Protocol",
-              child: Column(
-                children: [
-                  _ProtocolCheck("Trigger Interruption (Box Breathing)"),
-                  _ProtocolCheck("Loop Breaking (Walk outside)"),
-                  _ProtocolCheck("Journaling the urge"),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-            // D. Relapse Prevention
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.redAccent),
-                borderRadius: BorderRadius.circular(16.r),
-                color: Colors.redAccent.withAlpha(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        color: Colors.redAccent,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF2E2E6A), Color(0xFF4A4A8A)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        "Relapse Early Warning Signs",
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.sp,
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Text(
+                      DateFormat('MMMM d, y').format(DateTime.now()),
+                      style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                    ),
+                  ),
+
+                  SizedBox(height: 30.h),
+
+                  Text(
+                    "Go for a Mindful Walk",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    "Reset and refresh with a mindful walk outside",
+                    style: TextStyle(color: Colors.white60, fontSize: 13.sp),
+                  ),
+
+                  // Visual - Glowing Silhouette Placeholder
+                  Expanded(
+                    child: Center(
+                      child: Container(
+                        height: 300.h,
+                        width: 200.w,
+                        // Since we don't have the exact asset, we simulate the 'glow'
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orangeAccent.withOpacity(0.2),
+                              blurRadius: 60,
+                              spreadRadius: 20,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.directions_walk,
+                          size: 150.sp,
+                          color: Color(0xFFDEB988), // Gold color
+                          shadows: [
+                            Shadow(color: Colors.orangeAccent, blurRadius: 20),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  SizedBox(height: 12.h),
+
+                  // Timer
+                  Obx(
+                    () => Text(
+                      controller.timerString,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 48.sp,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
                   Text(
-                    "• Rationalizing 'just 5 minutes'",
-                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                    "BREATHE IN...",
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 14.sp,
+                      letterSpacing: 1.5,
+                    ),
                   ),
-                  Text(
-                    "• Skipping daily challenges",
-                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
+
+                  SizedBox(height: 40.h),
+
+                  // Done Button
+                  Container(
+                    width: double.infinity,
+                    height: 56.h,
+                    margin: EdgeInsets.only(bottom: 20.h),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.r),
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF2E2E6A).withOpacity(0.6),
+                          Color(0xFF2E2E6A),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      border: Border.all(
+                        color: Colors.blueAccent.withOpacity(0.3),
+                      ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: controller.completeTask,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Done",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
                   ),
-                  Text(
-                    "• Leaving phone near sleep area",
-                    style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                  ),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),
-
-            SizedBox(height: 24.h),
-            // E. Recovery Progress
-            Text(
-              "Recovery Progress",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _MetricColumn("Clean Streak", "12 Days", Colors.green),
-                _MetricColumn("Stability", "84/100", Colors.blue),
-                _MetricColumn("Risk Level", "Low", Colors.amber),
-              ],
-            ),
-
-            SizedBox(height: 40.h),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  const _SectionHeader(this.title);
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16.sp,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-}
-
-class _AlertCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color color;
-  const _AlertCard(this.title, this.value, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: color.withAlpha(30),
-        border: Border.all(color: color.withAlpha(100)),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            value,
-            style: TextStyle(color: Colors.white, fontSize: 14.sp),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-  const _SectionCard({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.black.withAlpha(50),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14.sp,
-            ),
-          ),
-          Divider(color: Colors.white12, height: 20.h),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _TriggerRow extends StatelessWidget {
-  final String type;
-  final String trigger;
-  final int intensity;
-  const _TriggerRow(this.type, this.trigger, this.intensity);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  trigger,
-                  style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                ),
-                Text(
-                  type,
-                  style: TextStyle(color: Colors.white54, fontSize: 11.sp),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: LinearProgressIndicator(
-              value: intensity / 100,
-              backgroundColor: Colors.white10,
-              color: Colors.redAccent,
-              minHeight: 6.h,
-              borderRadius: BorderRadius.circular(4.r),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProtocolCheck extends StatelessWidget {
-  final String label;
-  const _ProtocolCheck(this.label);
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: Row(
-        children: [
-          Icon(
-            Icons.check_box_outline_blank,
-            color: Colors.greenAccent,
-            size: 20.sp,
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white70, fontSize: 13.sp),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricColumn extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _MetricColumn(this.label, this.value, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white54, fontSize: 11.sp),
-        ),
-      ],
     );
   }
 }
