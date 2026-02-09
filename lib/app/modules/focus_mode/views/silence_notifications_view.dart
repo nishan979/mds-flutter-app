@@ -249,7 +249,10 @@ class SilenceNotificationsView extends GetView<FocusModeController> {
                           width: double.infinity,
                           height: 54.h,
                           child: ElevatedButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () async {
+                              await controller.saveSilencedNotifications();
+                              Get.back();
+                            },
                             style:
                                 ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,

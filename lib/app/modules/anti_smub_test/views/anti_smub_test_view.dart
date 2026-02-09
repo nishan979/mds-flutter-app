@@ -85,24 +85,8 @@ class AntiSmubTestView extends GetView<AntiSmubTestController> {
           // Background
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background_home.png', // Assuming this asset exists as per original code
+              'assets/images/background_home.png',
               fit: BoxFit.cover,
-            ),
-          ),
-
-          // Gradient Overlay to ensure readability if background is too bright
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.6),
-                    Colors.black.withOpacity(0.8),
-                  ],
-                ),
-              ),
             ),
           ),
 

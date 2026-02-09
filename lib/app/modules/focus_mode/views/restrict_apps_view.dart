@@ -281,7 +281,10 @@ class RestrictAppsView extends GetView<FocusModeController> {
                           width: double.infinity,
                           height: 54.h,
                           child: ElevatedButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () async {
+                              await controller.saveRestrictedApps();
+                              Get.back();
+                            },
                             style:
                                 ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,

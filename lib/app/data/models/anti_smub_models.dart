@@ -75,3 +75,40 @@ class SmubResult {
     );
   }
 }
+
+class SmubOption {
+  final int id;
+  final String text;
+  final int score;
+
+  SmubOption({required this.id, required this.text, required this.score});
+
+  factory SmubOption.fromJson(Map<String, dynamic> json) {
+    return SmubOption(
+      id: json['id'] ?? 0,
+      text: json['text'] ?? '',
+      score: json['score'] ?? 0,
+    );
+  }
+}
+
+class SmubQuestion {
+  final int id;
+  final String text;
+  final List<SmubOption> options;
+
+  SmubQuestion({required this.id, required this.text, required this.options});
+
+  factory SmubQuestion.fromJson(Map<String, dynamic> json) {
+    var list = json['options'] as List? ?? [];
+    List<SmubOption> optionsList = list
+        .map((i) => SmubOption.fromJson(i as Map<String, dynamic>))
+        .toList();
+
+    return SmubQuestion(
+      id: json['id'] ?? 0,
+      text: json['text'] ?? '',
+      options: optionsList,
+    );
+  }
+}

@@ -3,12 +3,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/daily_challenge_controller.dart';
+import '../bindings/daily_challenge_binding.dart'; // Import binding
+import 'challenge_library_view.dart';
+import 'start_challenge_view.dart';
 
 class DailyChallengeView extends GetView<DailyChallengeController> {
   const DailyChallengeView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Safety check: Ensure controller is registered (e.g., after hot restart)
+    if (!Get.isRegistered<DailyChallengeController>()) {
+      Get.put(DailyChallengeController());
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -40,198 +48,463 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
           ),
           SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              physics: BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Text(
-                      'Improve your SMUB score',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // A. Today's Challenge
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(20.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.purpleAccent.withAlpha(50),
-                          Colors.blueAccent.withAlpha(50),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(color: Colors.white30),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          "TODAY'S CHALLENGE",
-                          style: TextStyle(
-                            color: Colors.white54,
-                            letterSpacing: 1.2,
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          "No Social Media Until Noon",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.sp,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 8.h),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent.withAlpha(40),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Text(
-                            "Hard Difficulty",
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 11.sp,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20.h),
-                        Obx(
-                          () => Text(
-                            controller.countdownDisplay.value,
-                            style: TextStyle(
-                              fontFamily: 'Courier', // Monospace for timer look
-                              color: Colors.white,
-                              fontSize: 32.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "Time Remaining",
-                          style: TextStyle(
-                            color: Colors.white38,
-                            fontSize: 10.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-                  // B. Challenge Categories
+                  SizedBox(height: 10.h),
                   Text(
-                    "Topics",
+                    'Daily Challenge',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Take a daily step towards breaking free.',
+                    style: TextStyle(color: Colors.white54, fontSize: 13.sp),
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Streak Indicator
+                  Obx(
+                    () => Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 8.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: Colors.amber.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            color: Colors.amber,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            "Day ${controller.streakCount.value} Streak 🔥🔥🔥🔥🔥",
+                            style: TextStyle(
+                              color: Colors.amber,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+
+                  Text(
+                    "Today's Challenge",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: [
-                      _TopicChip("Digital Detox", Colors.green),
-                      _TopicChip("Focus Training", Colors.blue),
-                      _TopicChip("Awareness", Colors.orange),
-                      _TopicChip("Mental Discipline", Colors.purple),
-                      _TopicChip("Social Discipline", Colors.pink),
-                    ],
-                  ),
+                  SizedBox(height: 12.h),
 
-                  SizedBox(height: 20.h),
-                  // C. Challenge Mechanics
-                  _SectionCard(
-                    title: "Challenge Mechanics",
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _InstructionRow(
-                          "1. Connect Phone to Charger away from desk.",
+                  // Today's Challenge Card
+                  Obx(() {
+                    final challenge = controller.todaysChallenge;
+                    return Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(20.w),
+                      decoration: BoxDecoration(
+                        color: const Color(
+                          0xFF1E1E2C,
+                        ).withOpacity(0.8), // Darker card
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.1),
                         ),
-                        _InstructionRow("2. Use distraction blocker app."),
-                        _InstructionRow("3. Complete 4h of deep work."),
-                        SizedBox(height: 12.h),
-                        Text(
-                          "Success Condition: 0 unlocks before 12:00 PM",
-                          style: TextStyle(
-                            color: Colors.greenAccent,
-                            fontSize: 12.sp,
-                            fontStyle: FontStyle.italic,
+                        image: const DecorationImage(
+                          image: AssetImage(
+                            'assets/images/background_home.png',
+                          ), // Subtle texture reuse
+                          fit: BoxFit.cover,
+                          opacity: 0.2,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.hourglass_empty,
+                                    color: const Color(0xFFDEB988),
+                                    size: 32.sp,
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        challenge['title'],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.sp,
+                                        ),
+                                      ),
+                                      Text(
+                                        challenge['subtitle'],
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "Time Left",
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 10.sp,
+                                    ),
+                                  ),
+                                  Text(
+                                    challenge['timeLeft'], // Static for UI demo
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 8.h),
+                          Divider(color: Colors.white12),
+                          SizedBox(height: 8.h),
+                          Text(
+                            "Challenge Level: ${challenge['level']}",
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Text(
+                            "Success Conditions:",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          ...(challenge['successConditions'] as List<String>)
+                              .map(
+                                (condition) => Text(
+                                  "• $condition",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+
+                          SizedBox(height: 20.h),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Progress Rewards",
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 10.sp,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 14.sp,
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        "+${challenge['rewards']['points']} Points",
+                                        style: TextStyle(
+                                          color: Colors.amber,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.redAccent,
+                                        size: 14.sp,
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        "-${challenge['rewards']['penalty']} If failed",
+                                        style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontSize: 12.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Get.to(
+                                  () => const StartChallengeView(),
+                                  binding: DailyChallengeBinding(),
+                                ), // Navigate to Start Challenge
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2E2E6A),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 24.w,
+                                    vertical: 10.h,
+                                  ),
+                                ),
+                                child: Text("Start Challenge"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                  SizedBox(height: 24.h),
+
+                  // Reflection
+                  Text(
+                    "Reflection",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  SizedBox(height: 20.h),
-                  // D. Completion System
-                  Obx(
-                    () => SizedBox(
-                      width: double.infinity,
-                      height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: controller.isCheckInDone.value
-                            ? null
-                            : controller.checkIn,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: controller.isCheckInDone.value
-                              ? Colors.green
-                              : Colors.transparent,
-                          side: BorderSide(
-                            color: controller.isCheckInDone.value
-                                ? Colors.green
-                                : Colors.white,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          controller.isCheckInDone.value
-                              ? "CHECKED IN"
-                              : "CHECK-IN (I did it!)",
-                          style: TextStyle(
+                  SizedBox(height: 8.h),
+                  Text(
+                    "How did you feel during your offline hour?",
+                    style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                  ),
+                  SizedBox(height: 12.h),
+                  Obx(() {
+                    final hasReflection =
+                        controller.reflectionText.value.isNotEmpty;
+                    return GestureDetector(
+                      onTap: () {
+                        final textController = TextEditingController(
+                          text: controller.reflectionText.value,
+                        );
+                        Get.defaultDialog(
+                          title: "Daily Reflection",
+                          titleStyle: TextStyle(
                             color: Colors.white,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                           ),
+                          backgroundColor: const Color(0xFF1E1E2C),
+                          radius: 16.r,
+                          contentPadding: EdgeInsets.all(20.w),
+                          content: Container(
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: TextField(
+                              controller: textController,
+                              maxLines: 5,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                              ),
+                              cursorColor: const Color(0xFFDEB988),
+                              decoration: InputDecoration.collapsed(
+                                hintText: "Review your day...",
+                                hintStyle: TextStyle(color: Colors.white38),
+                              ),
+                            ),
+                          ),
+                          confirm: SizedBox(
+                            width: 100.w,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                controller.saveReflection(textController.text);
+                                Get.back();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFDEB988),
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                              child: Text("Save"),
+                            ),
+                          ),
+                          cancel: SizedBox(
+                            width: 100.w,
+                            child: TextButton(
+                              onPressed: () => Get.back(),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white54,
+                              ),
+                              child: Text("Cancel"),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: Colors.white12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_note,
+                                    color: Colors.white70,
+                                    size: 20.sp,
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: Text(
+                                      hasReflection
+                                          ? "Edit Reflection"
+                                          : "Write Reflection",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14.sp,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              hasReflection ? "VIEW >" : "MANAGE >",
+                              style: TextStyle(
+                                color: Colors.white38,
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+
+                  Obx(
+                    () => controller.reflectionText.value.isNotEmpty
+                        ? Padding(
+                            padding: EdgeInsets.only(top: 12.h),
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.03),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                controller.reflectionText.value,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                  ),
+
+                  SizedBox(height: 24.h),
+
+                  // Challenge Library Snippet
+                  Text(
+                    "Challenge Library",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _LibraryThumb("Break the Chain", Icons.link_off),
+                      _LibraryThumb(
+                        "Train Your Brain",
+                        Icons.lightbulb_outline,
+                      ),
+                      _LibraryThumb("Bedtime Routine", Icons.bed),
+                      _LibraryThumb("Silent Hour", Icons.volume_off),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => Get.to(
+                        () => const ChallengeLibraryView(),
+                        binding: DailyChallengeBinding(),
+                      ), // Navigate to Library
+                      child: Text(
+                        "VIEW ALL CHALLENGES >",
+                        style: TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ),
                   ),
-
-                  SizedBox(height: 20.h),
-                  // E. Reward Engine
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _RewardCard("Review Points", "+50", Icons.star),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _RewardCard(
-                          "Streak",
-                          "5 Days",
-                          Icons.local_fire_department,
-                        ),
-                      ),
-                    ],
-                  ),
-
                   SizedBox(height: 40.h),
                 ],
               ),
@@ -243,106 +516,38 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
   }
 }
 
-class _TopicChip extends StatelessWidget {
+class _LibraryThumb extends StatelessWidget {
   final String label;
-  final Color color;
-  const _TopicChip(this.label, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: color.withAlpha(30),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color.withAlpha(100)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(color: Colors.white, fontSize: 11.sp),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-  const _SectionCard({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.black.withAlpha(40),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14.sp,
-            ),
-          ),
-          Divider(color: Colors.white12, height: 20.h),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _InstructionRow extends StatelessWidget {
-  final String text;
-  const _InstructionRow(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
-      child: Text(
-        text,
-        style: TextStyle(color: Colors.white70, fontSize: 13.sp),
-      ),
-    );
-  }
-}
-
-class _RewardCard extends StatelessWidget {
-  final String label;
-  final String value;
   final IconData icon;
-  const _RewardCard(this.label, this.value, this.icon);
+
+  const _LibraryThumb(this.label, this.icon);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      width: 75.w,
+      height: 85.h,
+      padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(10),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.white10),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.amber, size: 24.sp),
+          Icon(icon, color: const Color(0xFFDEB988), size: 24.sp),
           SizedBox(height: 8.h),
           Text(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18.sp,
-            ),
-          ),
-          Text(
             label,
-            style: TextStyle(color: Colors.white54, fontSize: 11.sp),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 10.sp,
+              height: 1.1,
+            ),
           ),
         ],
       ),

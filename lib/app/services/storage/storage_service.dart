@@ -35,4 +35,17 @@ class StorageService extends GetxService {
   Future<void> removeUser() async => _box.remove(_keyUser);
 
   Future<void> clearAll() async => _box.erase();
+
+  // Generic helpers for app settings
+  Future<void> writeString(String key, String value) async =>
+      _box.write(key, value);
+  String? readString(String key) => _box.read<String?>(key);
+
+  Future<void> writeStringList(String key, List<String> values) async =>
+      _box.write(key, values);
+  List<String>? readStringList(String key) =>
+      _box.read<List<dynamic>?>(key)?.cast<String>();
+
+  Future<void> writeInt(String key, int value) async => _box.write(key, value);
+  int? readInt(String key) => _box.read<int?>(key);
 }

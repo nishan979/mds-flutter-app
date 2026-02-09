@@ -66,21 +66,6 @@ class FocusModeView extends GetView<FocusModeController> {
               fit: BoxFit.cover,
             ),
           ),
-          // Gradient Overlay
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.6),
-                    Color(0xFF1a1a2e).withOpacity(0.95),
-                  ],
-                ),
-              ),
-            ),
-          ),
 
           SafeArea(
             child: SingleChildScrollView(
@@ -141,9 +126,17 @@ class _StatusCard extends GetView<FocusModeController> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C).withOpacity(0.6),
+        color: Colors.black.withOpacity(0.35),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 0.5),
+        border: Border.all(color: Colors.white.withOpacity(0.06), width: 0.6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blueAccent.withOpacity(0.06),
+            blurRadius: 24,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -152,23 +145,33 @@ class _StatusCard extends GetView<FocusModeController> {
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.lightBlueAccent.withOpacity(0.35),
+                  Colors.transparent,
+                ],
+                center: Alignment.center,
+                radius: 0.9,
+              ),
               border: Border.all(
-                color: Colors.blueAccent.withOpacity(0.5),
-                width: 2,
+                color: Colors.blueAccent.withOpacity(0.25),
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blueAccent.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 5,
+                  color: Colors.blueAccent.withOpacity(0.25),
+                  blurRadius: 30,
+                  spreadRadius: 6,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Icon(
-              Icons.check_rounded,
-              color: Colors.lightBlueAccent,
-              size: 40.sp,
-            ),
+            child: Icon(Icons.check_rounded, color: Colors.white, size: 40.sp),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -344,26 +347,28 @@ class _SessionControlCard extends GetView<FocusModeController> {
                     gradient: LinearGradient(
                       colors: controller.isFocusOn.value
                           ? [
-                              Colors.redAccent.withOpacity(0.8),
-                              Colors.red.withOpacity(0.6),
+                              Colors.redAccent.withOpacity(0.9),
+                              Colors.deepOrange.withOpacity(0.8),
                             ]
                           : [
-                              const Color(0xFF0F2027),
-                              const Color(0xFF203A43),
-                              const Color(0xFF2C5364),
-                            ], // Bluish gradient
+                              const Color(0xFF0b2a3a),
+                              const Color(0xFF123046),
+                              const Color(0xFF18455a),
+                            ],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: controller.isFocusOn.value
-                            ? Colors.redAccent.withOpacity(0.3)
-                            : Colors.blue.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+                            ? Colors.redAccent.withOpacity(0.25)
+                            : Colors.blueAccent.withOpacity(0.25),
+                        blurRadius: 18,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 6),
                       ),
                     ],
+                    border: Border.all(color: Colors.white.withOpacity(0.04)),
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -371,8 +376,8 @@ class _SessionControlCard extends GetView<FocusModeController> {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.4,
                     ),
                   ),
                 ),
@@ -416,7 +421,7 @@ class _SettingsList extends GetView<FocusModeController> {
         _buildSettingsTile(
           icon: Icons.track_changes_outlined,
           title: "Focus Presets",
-          onTap: () {}, // Handled in modal or navigation if needed
+          onTap: controller.navigateToFocusPresets,
         ),
       ],
     );

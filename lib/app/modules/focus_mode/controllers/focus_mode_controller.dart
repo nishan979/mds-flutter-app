@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:mds/app/services/storage/storage_service.dart';
 import '../views/restrict_apps_view.dart';
 import '../views/silence_notifications_view.dart';
 import '../views/set_focus_goal_view.dart';
 import '../views/edit_goal_view.dart';
+import '../views/focus_presets_view.dart';
 
 class FocusPresetConfig {
   final String label;
@@ -107,6 +109,11 @@ class FocusModeController extends GetxController {
     } else {
       restrictedApps.add(appName);
     }
+    // persist change
+    try {
+      final storage = Get.find<StorageService>();
+      storage.writeStringList(_kRestrictedApps, restrictedApps);
+    } catch (_) {}
   }
 
   void toggleSilencedNotification(String title) {
@@ -115,6 +122,10 @@ class FocusModeController extends GetxController {
     } else {
       silencedNotifications.add(title);
     }
+    try {
+      final storage = Get.find<StorageService>();
+      storage.writeStringList(_kSilencedNotifications, silencedNotifications);
+    } catch (_) {}
   }
 
   void toggleDnd() {
@@ -155,6 +166,10 @@ class FocusModeController extends GetxController {
     Get.to(() => const FocusSetGoalView());
   }
 
+  void navigateToFocusPresets() {
+    Get.to(() => const FocusPresetsView());
+  }
+
   void navigateToEditGoal() {
     Get.to(() => const EditGoalView());
   }
@@ -165,6 +180,27 @@ class FocusModeController extends GetxController {
     } else {
       activeSupportingGoals.add(goal);
     }
+  }
+
+  /// Add a custom supporting goal (from UI). Adds to available list and marks selected.
+  void addCustomSupportingGoal(String title) {
+    final t = title.trim();
+    if (t.isEmpty) return;
+    if (!availableSupportingGoals.contains(t)) {
+      availableSupportingGoals.add(t);
+    }
+    if (!activeSupportingGoals.contains(t)) {
+      activeSupportingGoals.add(t);
+    }
+    Get.snackbar(
+      'Added',
+      'Custom goal added',
+      backgroundColor: Colors.black.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
   }
 
   final Map<String, FocusPresetConfig> presetConfigs = {
@@ -212,11 +248,39 @@ class FocusModeController extends GetxController {
 
   Timer? _timer;
 
+  // Storage keys
+  static const _kRestrictedApps = 'focus_restricted_apps';
+  static const _kSilencedNotifications = 'focus_silenced_notifications';
+  static const _kPresetSelected = 'focus_preset_selected';
+  static const _kFocusDuration = 'focus_duration_minutes';
+
   @override
   void onInit() {
     super.onInit();
     // Initialize defaults
     selectPreset('Work Mode');
+    // Load persisted settings if available
+    try {
+      final storage = Get.find<StorageService>();
+      final restricted = storage.readStringList(_kRestrictedApps);
+      if (restricted != null && restricted.isNotEmpty) {
+        restrictedApps.assignAll(restricted);
+      }
+      final silenced = storage.readStringList(_kSilencedNotifications);
+      if (silenced != null && silenced.isNotEmpty) {
+        silencedNotifications.assignAll(silenced);
+      }
+      final preset = storage.readString(_kPresetSelected);
+      if (preset != null && preset.isNotEmpty) {
+        // selectPreset handles setting duration and activeConfig
+        selectPreset(preset);
+      }
+      final fd = storage.readInt(_kFocusDuration);
+      if (fd != null) {
+        focusDuration.value = fd;
+        remainingSeconds.value = fd * 60;
+      }
+    } catch (_) {}
   }
 
   @override
@@ -246,6 +310,11 @@ class FocusModeController extends GetxController {
       focusDuration.value = 25;
     }
     resetTimer();
+    try {
+      final storage = Get.find<StorageService>();
+      storage.writeString(_kPresetSelected, presetSelected.value);
+      storage.writeInt(_kFocusDuration, focusDuration.value);
+    } catch (_) {}
   }
 
   void toggleFocusSession() {
@@ -267,6 +336,60 @@ class FocusModeController extends GetxController {
         _finishSession();
       }
     });
+  }
+
+  // Explicit save helpers for UI buttons
+  Future<void> saveRestrictedApps() async {
+    try {
+      final storage = Get.find<StorageService>();
+      await storage.writeStringList(_kRestrictedApps, restrictedApps);
+    } catch (_) {}
+    Get.snackbar(
+      'Saved',
+      '${restrictedApps.length} apps selected',
+      backgroundColor: Colors.black.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
+  }
+
+  Future<void> saveSilencedNotifications() async {
+    try {
+      final storage = Get.find<StorageService>();
+      await storage.writeStringList(
+        _kSilencedNotifications,
+        silencedNotifications,
+      );
+    } catch (_) {}
+    Get.snackbar(
+      'Saved',
+      '${silencedNotifications.length} items saved',
+      backgroundColor: Colors.black.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
+  }
+
+  Future<void> savePresetAndClose() async {
+    try {
+      final storage = Get.find<StorageService>();
+      await storage.writeString(_kPresetSelected, presetSelected.value);
+      await storage.writeInt(_kFocusDuration, focusDuration.value);
+    } catch (_) {}
+    Get.snackbar(
+      'Saved',
+      'Preset saved',
+      backgroundColor: Colors.black.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
+    Get.back();
   }
 
   void _stopTimer() {

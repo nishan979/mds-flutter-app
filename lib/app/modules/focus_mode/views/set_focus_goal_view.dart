@@ -433,28 +433,71 @@ class FocusSetGoalView extends GetView<FocusModeController> {
   }
 
   Widget _buildAddCustomGoalButton() {
-    return Container(
-      height: 50.h,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "ADD CUSTOM GOAL",
-            style: TextStyle(
-              color: Colors.blueAccent[100],
-              fontSize: 11.sp,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        final TextEditingController _textController = TextEditingController();
+        Get.dialog(
+          AlertDialog(
+            backgroundColor: const Color(0xFF121212),
+            title: const Text(
+              'Add Custom Goal',
+              style: TextStyle(color: Colors.white),
             ),
+            content: TextField(
+              controller: _textController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Enter goal',
+                hintStyle: TextStyle(color: Colors.white38),
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final val = _textController.text.trim();
+                  if (val.isNotEmpty) {
+                    controller.addCustomSupportingGoal(val);
+                  }
+                  Get.back();
+                },
+                child: const Text('Add', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-          SizedBox(width: 4.w),
-          Icon(Icons.add, color: Colors.blueAccent[100], size: 14.sp),
-        ],
+          barrierDismissible: true,
+        );
+      },
+      child: Container(
+        height: 50.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "ADD CUSTOM GOAL",
+              style: TextStyle(
+                color: Colors.blueAccent[100],
+                fontSize: 11.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Icon(Icons.add, color: Colors.blueAccent[100], size: 14.sp),
+          ],
+        ),
       ),
     );
   }
