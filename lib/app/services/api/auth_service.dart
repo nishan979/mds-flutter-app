@@ -173,6 +173,13 @@ class AuthService {
     required String deviceName,
   }) async {
     try {
+      // Clear any previous session info to ensure clean login attempt
+      _apiClient.clearAuthToken();
+      // We don't wipe storage yet in case login fails and we want to keep old session?
+      // No, if user is logging in, they likely want new session.
+      // But typically we don't wipe storage until success.
+      // However, preventing the "Authorization" header is key.
+
       final requestBody = {
         'email': email,
         'password': password,
@@ -255,12 +262,26 @@ class AuthService {
         body: {},
         converter: (json) {},
       );
+    } catch (e) {
+      print('[LOGOUT] API warning: $e');
+    } finally {
+      // Always cleanup local state
+      _expiryTimer?.cancel();
       _apiClient.clearAuthToken();
       final storage = Get.find<StorageService>();
+
+      print('[LOGOUT] Removing all local session data...');
       await storage.removeToken();
+      await storage.removeRefreshToken();
+      await storage.removeTokenExpiry();
       await storage.removeUser();
-    } catch (e) {
-      rethrow;
+
+      // Verify removal
+      if (storage.token != null) {
+        print('[LOGOUT] WARNING: Token removal failed or not yet persisted.');
+      } else {
+        print('[LOGOUT] Local session data cleared successfully.');
+      }
     }
   }
 

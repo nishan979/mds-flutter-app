@@ -10,7 +10,7 @@ class HomeController extends GetxController {
   void increment() => count.value++;
 
   Future<void> logout() async {
-    final auth = AuthService();
+    final auth = Get.find<AuthService>();
     try {
       await auth.logout();
       showAppSnack(

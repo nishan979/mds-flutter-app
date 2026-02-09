@@ -111,24 +111,44 @@ class ApiClient extends GetxService {
       print('[API][POST] Body: ${response.bodyString}');
 
       // handle 401 - try refresh once
+      // handle 401 - try refresh once
+      // handle 401 - try refresh once
       if (response.statusCode == 401) {
         print('[API][POST] Received 401, attempting token refresh');
-        final auth = Get.find<AuthService>();
-        final refreshed = await auth.refreshToken();
-        if (refreshed) {
-          print('[API][POST] Refresh succeeded, retrying request');
-          // update headers with new token
-          usedHeaders['Authorization'] =
-              'Bearer ${Get.find<StorageService>().token}';
-          response = await _getConnect.post(
-            endpoint,
-            encodedBody,
-            headers: usedHeaders,
-          );
-          print('[API][POST] Retry Status: ${response.statusCode}');
-          print('[API][POST] Retry Body: ${response.bodyString}');
+
+        // Avoid infinite loop if the 401 comes from the logout request itself
+        // ALSO skip refresh for login/register - 401 here means bad credentials, not expired token
+        if (endpoint.contains('logout') ||
+            endpoint.contains('login') ||
+            endpoint.contains('register')) {
+          print('[API][POST] 401 on $endpoint - skipping refresh logic');
+          // Just return the response so the specific API call can handle the 401
+          return _handleResponse<T>(response, converter);
         } else {
-          print('[API][POST] Refresh failed');
+          final auth = Get.find<AuthService>();
+          final refreshed = await auth.refreshToken();
+          if (refreshed) {
+            print('[API][POST] Refresh succeeded, retrying request');
+            // update headers with new token
+            usedHeaders['Authorization'] =
+                'Bearer ${Get.find<StorageService>().token}';
+            response = await _getConnect.post(
+              endpoint,
+              encodedBody,
+              headers: usedHeaders,
+            );
+            print('[API][POST] Retry Status: ${response.statusCode}');
+            print('[API][POST] Retry Body: ${response.bodyString}');
+          } else {
+            print('[API][POST] Refresh failed - Session expired');
+            // Force logout to clear invalid state
+            await auth.logout();
+            Get.offAllNamed('/login');
+            throw ApiException(
+              message: 'Session expired. Please login again.',
+              statusCode: 401,
+            );
+          }
         }
       }
 

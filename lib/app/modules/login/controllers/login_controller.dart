@@ -89,12 +89,26 @@ class LoginController extends GetxController {
             resp.user.emailVerifiedAt!.isEmpty) {
           Get.offAllNamed('/check-email', arguments: resp.user.email);
         } else {
+          // Show success snackbar on successful login
+          showAppSnack(
+            title: 'Success',
+            message: 'Login successful',
+            type: SnackType.success,
+          );
           Get.offAllNamed(Routes.HOME);
         }
       } on ApiException catch (e) {
         isLoading.value = false;
         String msg = e.message;
         String title = 'Login Error';
+
+        // Handle 403 explicitly
+        if (e.statusCode == 403) {
+          title = 'Verification Required';
+          // If the message is generic, we could make it more specific,
+          // but the backend message "Please verify..." is usually good.
+        }
+
         // Check both the main message and any error details for credential errors
         bool isCredentialError = false;
         if (e.statusCode == 422) {
@@ -110,30 +124,53 @@ class LoginController extends GetxController {
             }
           }
         }
+
         if (isCredentialError) {
           msg = 'Email or password is incorrect.';
           title = 'Incorrect Credentials';
         }
+
         errorMessage.value = msg;
-        Get.snackbar(
-          title,
-          msg,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
+
+        // Use custom snackbar for consistency
+        showAppSnack(title: title, message: msg, type: SnackType.error);
       } catch (e) {
         isLoading.value = false;
-        errorMessage.value = 'An unexpected error occurred';
-        Get.snackbar(
-          'Error',
-          'An unexpected error occurred',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
+
+        // Debugging prints
+        print('[LOGIN DEBUG] Caught exception of type: ${e.runtimeType}');
+        print('[LOGIN DEBUG] Exception toString: $e');
+
+        String msg = 'An unexpected error occurred';
+        try {
+          // Try to access message property dynamically
+          final dynamicE = e as dynamic;
+          // Some exceptions might have a message property
+          if (dynamicE.message != null) {
+            msg = dynamicE.message.toString();
+          } else {
+            msg = e.toString();
+          }
+        } catch (_) {
+          msg = e.toString();
+        }
+
+        // Clean up common exception prefixes for cleaner UI
+        if (msg.startsWith('Exception: ')) {
+          msg = msg.substring(11);
+        }
+        // If it's the raw string "ApiException: ...", let's clean it up
+        if (msg.startsWith('ApiException: ')) {
+          // We can try to regex it or just strip the prefix
+          // 'ApiException: message (Status: 403)'
+          final end = msg.lastIndexOf(' (Status:');
+          if (end != -1) {
+            msg = msg.substring(14, end);
+          }
+        }
+
+        errorMessage.value = msg;
+        showAppSnack(title: 'Error', message: msg, type: SnackType.error);
       }
     }
   }

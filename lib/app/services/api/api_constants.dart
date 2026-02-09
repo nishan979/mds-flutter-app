@@ -9,8 +9,8 @@ class ApiConstants {
   static const String refreshTokenEndpoint = '/auth/refresh';
 
   // Timeouts
-  static const int connectTimeout = 30000; // 30 seconds
-  static const int receiveTimeout = 30000; // 30 seconds
+  static const int connectTimeout = 15000; // 15 seconds
+  static const int receiveTimeout = 15000; // 15 seconds
 
   // Headers
   static const Map<String, String> defaultHeaders = {

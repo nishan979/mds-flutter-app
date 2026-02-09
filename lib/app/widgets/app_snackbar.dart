@@ -9,6 +9,8 @@ void showAppSnack({
   SnackType type = SnackType.info,
   SnackPosition position = SnackPosition.BOTTOM,
   Duration duration = const Duration(seconds: 3),
+  String? buttonLabel,
+  VoidCallback? onButtonPressed,
 }) {
   Color background;
   Icon icon;
@@ -40,5 +42,14 @@ void showAppSnack({
     margin: const EdgeInsets.all(12),
     borderRadius: 12,
     icon: icon,
+    mainButton: onButtonPressed != null
+        ? TextButton(
+            onPressed: onButtonPressed,
+            child: Text(
+              buttonLabel ?? 'OK',
+              style: const TextStyle(color: Colors.white),
+            ),
+          )
+        : null,
   );
 }
