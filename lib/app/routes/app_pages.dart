@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:get/get.dart';
+import '../modules/daily_challenge/views/start_challenge_view.dart';
 
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
@@ -118,6 +119,10 @@ class AppPages {
       name: _Paths.RECOVERY_TASK,
       page: () => const RecoveryTaskView(),
       binding: RecoveryTaskBinding(),
+    ),
+    GetPage(
+      name: _Paths.START_CHALLENGE,
+      page: () => const StartChallengeView(),
     ),
   ];
 }

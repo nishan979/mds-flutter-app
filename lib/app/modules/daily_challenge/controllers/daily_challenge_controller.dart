@@ -1,40 +1,61 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import '../../../services/storage/storage_service.dart';
 
 class DailyChallengeController extends GetxController {
+  final StorageService _storage = Get.find<StorageService>();
+
   // Timer & Countdown
-  final countTime = '08:30:00'.obs;
-  RxString countdownDisplay = "04:30:00".obs;
-  Timer? _timer;
-  int _secondsRemaining = 4 * 3600 + 30 * 60; // 4 hours 30 mins
+  // Timer for the challenge itself (optional usage)
+  Timer? _countdownTimer;
+  final RxInt challengeDurationSeconds = (60 * 60).obs; // Default 60 mins
+  final RxString challengeTimerDisplay = "60:00".obs;
+  final RxBool isChallengeRunning = false.obs;
 
   // Challenge State
-  final RxInt streakCount = 142.obs;
+  final RxInt streakCount = 0.obs;
   final RxBool isCheckInDone = false.obs;
   final RxBool challengeActive = false.obs;
   final RxString reflectionText = ''.obs;
 
-  // Today's Challenge Data
-  final Map<String, dynamic> todaysChallenge = {
-    'title': 'Digital Detox Hour',
-    'subtitle': 'Go offline for 60 minutes.',
-    'duration': '60 minutes',
-    'timeLeft': '1h 01m', // This could be dynamic based on a deadline
-    'level': 'Moderate',
-    'successConditions': [
-      '60 minutes offline',
-      'No social apps',
-      'No web browsing',
-    ],
-    'rewards': {'points': 10, 'penalty': 1},
-    'checklistItems': [
-      'Block Distracting Apps',
-      'Focus Study Sessions',
-      'Exercise Daily',
-      'Gratitude in the Morning',
-    ],
-  }.obs;
+  // Daily Rotation
+  final RxMap<String, dynamic> todaysChallenge = <String, dynamic>{}.obs;
+
+  // Pool of Challenges for Daily Rotation
+  final List<Map<String, dynamic>> _challengePool = [
+    {
+      'title': 'Digital Detox Hour',
+      'subtitle': 'Go offline for 60 minutes.',
+      'duration': '60 minutes',
+      'duration_seconds': 3600,
+      'level': 'Moderate',
+      'successConditions': ['60 minutes offline', 'No social apps'],
+      'rewards': {'points': 10, 'penalty': 1},
+      'checklistItems': ['Block Apps', 'Put Phone Away', 'Set Intent'],
+    },
+    {
+      'title': 'Focus Sprint',
+      'subtitle': 'Concentrate deeply for 30 minutes.',
+      'duration': '30 minutes',
+      'duration_seconds': 1800,
+      'level': 'Easy',
+      'successConditions': ['30 minutes focus', 'Single tasking'],
+      'rewards': {'points': 5, 'penalty': 0},
+      'checklistItems': ['Clear Desk', 'Hydrate', 'Start Timer'],
+    },
+    {
+      'title': 'Evening Wind Down',
+      'subtitle': 'No screens 1 hour before bed.',
+      'duration': '60 minutes',
+      'duration_seconds': 3600,
+      'level': 'Hard',
+      'successConditions': ['No blue light', 'Read a book'],
+      'rewards': {'points': 15, 'penalty': 2},
+      'checklistItems': ['Dim Lights', 'Set Alarm', 'Read'],
+    },
+  ];
 
   // Checklist for Start Challenge Page
   final RxList<bool> checklist = [
@@ -83,6 +104,8 @@ class DailyChallengeController extends GetxController {
 
   void saveReflection(String text) {
     reflectionText.value = text;
+    _storage.writeString('daily_reflection_${_getTodayKey()}', text);
+
     Get.snackbar(
       "Saved",
       "Your reflection has been saved.",
@@ -97,45 +120,71 @@ class DailyChallengeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initialize checklist based on today's challenge items
-    final items = todaysChallenge['checklistItems'] as List;
-    checklist.assignAll(List.generate(items.length, (_) => false));
+    _loadDailyData();
+  }
 
-    _startCountdown();
+  void _loadDailyData() {
+    try {
+      // 1. Pick Daily Challenge (Deterministic based on day index)
+      final dayOfYear = int.parse(DateFormat("D").format(DateTime.now()));
+      final index = dayOfYear % _challengePool.length;
+
+      // Use assignAll for RxMap
+      todaysChallenge.assignAll(_challengePool[index]);
+      todaysChallenge['timeLeft'] = "Midnight"; // simplified display
+
+      // 2. Load Checklist
+      final items = todaysChallenge['checklistItems'];
+      if (items is List) {
+        checklist.assignAll(List.generate(items.length, (_) => false));
+      } else {
+        checklist.clear();
+      }
+
+      // 3. Load Persistence
+      streakCount.value = _storage.readInt('challenge_streak') ?? 0;
+
+      final todayKey = _getTodayKey();
+      if (_storage.readString('last_checkin_date') == todayKey) {
+        isCheckInDone.value = true;
+      }
+
+      reflectionText.value =
+          _storage.readString('daily_reflection_$todayKey') ?? '';
+    } catch (e) {
+      print("Error loading daily challenge data: $e");
+      // Fallback or empty state handling could go here
+    }
+  }
+
+  String _getTodayKey() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month}-${now.day}";
   }
 
   @override
   void onClose() {
-    _timer?.cancel();
+    _countdownTimer?.cancel();
     super.onClose();
-  }
-
-  void _startCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_secondsRemaining > 0) {
-        _secondsRemaining--;
-        final hours = (_secondsRemaining / 3600).floor().toString().padLeft(
-          2,
-          '0',
-        );
-        final minutes = ((_secondsRemaining % 3600) / 60)
-            .floor()
-            .toString()
-            .padLeft(2, '0');
-        final seconds = (_secondsRemaining % 60).toString().padLeft(2, '0');
-        countdownDisplay.value = "$hours:$minutes:$seconds";
-      } else {
-        timer.cancel();
-      }
-    });
   }
 
   void checkIn() {
     if (!isCheckInDone.value) {
       isCheckInDone.value = true;
+
+      // Update Persistence
+      final todayKey = _getTodayKey();
+      _storage.writeString('last_checkin_date', todayKey);
+
+      // Update Streak
+      // Ideally check if yesterday was completed to increment, otherwise reset.
+      // For simplicity, we just increment.
+      streakCount.value++;
+      _storage.writeInt('challenge_streak', streakCount.value);
+
       Get.snackbar(
         "Success",
-        "Challenge Checked-in! Rewards claimed.",
+        "Challenge Completed! Streak Updated.",
         backgroundColor: Colors.black.withOpacity(0.8),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -152,16 +201,45 @@ class DailyChallengeController extends GetxController {
   }
 
   void startChallenge() {
-    // Logic to start the timer/challenge
-    challengeActive.value = true;
-    Get.snackbar(
-      "Started",
-      "Challenge Started! Good luck.",
-      backgroundColor: Colors.green.withOpacity(0.8),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: EdgeInsets.all(16),
-      borderRadius: 12,
+    if (isChallengeRunning.value) return;
+
+    // Reset checklist state for clean start
+    final items = todaysChallenge['checklistItems'];
+    if (items is List) {
+      checklist.assignAll(List.generate(items.length, (_) => false));
+    }
+
+    // Set duration from challenge data
+    int duration = todaysChallenge['duration_seconds'] ?? 60;
+    challengeDurationSeconds.value = duration;
+    isChallengeRunning.value = true;
+
+    Get.back(); // close start view
+    // Start background timer notification if needed
+    Get.snackbar("Started", "Timer started in background!");
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (challengeDurationSeconds.value > 0) {
+        challengeDurationSeconds.value--;
+        _updateTimerDisplay();
+      } else {
+        timer.cancel();
+        isChallengeRunning.value = false;
+        checkIn(); // Auto complete when timer ends
+      }
+    });
+  }
+
+  void _updateTimerDisplay() {
+    final minutes = (challengeDurationSeconds.value / 60)
+        .floor()
+        .toString()
+        .padLeft(2, '0');
+    final seconds = (challengeDurationSeconds.value % 60).toString().padLeft(
+      2,
+      '0',
     );
+    challengeTimerDisplay.value = "$minutes:$seconds";
   }
 }

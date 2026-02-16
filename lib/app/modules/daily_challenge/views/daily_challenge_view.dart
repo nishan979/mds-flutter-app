@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 
 import '../controllers/daily_challenge_controller.dart';
 import '../bindings/daily_challenge_binding.dart'; // Import binding
+import '../../../routes/app_pages.dart';
 import 'challenge_library_view.dart';
-import 'start_challenge_view.dart';
 
 class DailyChallengeView extends GetView<DailyChallengeController> {
   const DailyChallengeView({super.key});
@@ -144,37 +144,46 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.hourglass_empty,
-                                    color: const Color(0xFFDEB988),
-                                    size: 32.sp,
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        challenge['title'],
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16.sp,
-                                        ),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.hourglass_empty,
+                                      color: const Color(0xFFDEB988),
+                                      size: 32.sp,
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            challenge['title'] ?? "Loading...",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.sp,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                          Text(
+                                            challenge['subtitle'] ?? "",
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12.sp,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        challenge['subtitle'],
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
+                              SizedBox(width: 16.w),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
@@ -186,7 +195,8 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
                                     ),
                                   ),
                                   Text(
-                                    challenge['timeLeft'], // Static for UI demo
+                                    challenge['timeLeft'] ??
+                                        "--", // Static for UI demo
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 14.sp,
@@ -282,9 +292,8 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
                                 ],
                               ),
                               ElevatedButton(
-                                onPressed: () => Get.to(
-                                  () => const StartChallengeView(),
-                                  binding: DailyChallengeBinding(),
+                                onPressed: () => Get.toNamed(
+                                  Routes.START_CHALLENGE,
                                 ), // Navigate to Start Challenge
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2E2E6A),
