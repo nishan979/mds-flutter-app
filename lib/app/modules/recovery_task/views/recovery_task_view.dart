@@ -225,29 +225,51 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
             ),
           ),
           SizedBox(height: 24.h),
-          SizedBox(
-            width: double.infinity,
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: controller.startRecovery,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF1E60C9),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.r),
+          Obx(() {
+            final isCompleted = controller.isDailyCompleted.value;
+            return SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: ElevatedButton(
+                onPressed: isCompleted ? null : controller.startRecovery,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isCompleted
+                      ? Colors.green
+                      : Color(0xFF1E60C9),
+                  disabledBackgroundColor: Colors.green.withOpacity(0.8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24.r),
+                  ),
+                  elevation: 4,
+                  shadowColor: (isCompleted ? Colors.green : Color(0xFF1E60C9))
+                      .withOpacity(0.4),
                 ),
-                elevation: 4,
-                shadowColor: Color(0xFF1E60C9).withOpacity(0.4),
-              ),
-              child: Text(
-                "Complete Recovery (${template.estimatedMinutes} minutes)",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isCompleted) ...[
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                    ],
+                    Text(
+                      isCompleted
+                          ? "Recovery Completed"
+                          : "Complete Recovery (${template.estimatedMinutes} minutes)",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );

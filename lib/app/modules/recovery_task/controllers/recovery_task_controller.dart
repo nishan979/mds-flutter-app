@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../services/storage/storage_service.dart';
 import '../data/recovery_templates.dart';
 
 class RecoveryTaskStep {
@@ -16,11 +17,14 @@ class RecoveryTaskStep {
 }
 
 class RecoveryTaskController extends GetxController {
+  final StorageService _storage = Get.find<StorageService>();
+
   // Navigation: 0 = Overview, 1-4 = Wizard
   final RxInt currentStep = 0.obs;
   final int totalSteps = 4;
 
   final Rx<DateTime> selectedDate = DateTime.now().obs;
+  final RxBool isDailyCompleted = false.obs;
 
   // Dynamic Template Loading
   // Initialize with a fallback to avoid late initialization errors if referenced early
@@ -127,10 +131,22 @@ class RecoveryTaskController extends GetxController {
       }
     }
 
-    // 4. Map to Overview
+    // 4. Check Persistence
+    // Check if we have a record for this day
+    final dateKey = _getDateKey(selectedDate.value);
+    final completed = _storage.readString(dateKey) == 'true';
+    isDailyCompleted.value = completed;
+
+    // 5. Map to Overview
     // Overview steps should show the actions the user will take
     overviewSteps.value = template.steps
-        .map((s) => RecoveryTaskStep(title: s.title, subtitle: s.subtitle))
+        .map(
+          (s) => RecoveryTaskStep(
+            title: s.title,
+            subtitle: s.subtitle,
+            isCompleted: completed, // Mark all as done if day is completed
+          ),
+        )
         .toList();
   }
 
@@ -198,20 +214,19 @@ class RecoveryTaskController extends GetxController {
         }
         return true;
       case 3:
-        // Basic validation for text inputs if they exist
-        // Iterate through steps and check if required fields are filled?
-        // For now, let's just let them proceed unless it's critical.
-        // We can enforce text fields if we want.
-        /*
+        // Validate text inputs
         for (var step in dailyTemplate.value.steps) {
           if (step.type == RecoveryStepType.textInput) {
-            if (textControllers[step.id]?.text.trim().isEmpty ?? true) {
-               _showError("Reflection Needed", "Please complete all text fields.");
-               return false;
+            final text = textControllers[step.id]?.text.trim();
+            if (text == null || text.isEmpty) {
+              _showError(
+                "Reflection Needed",
+                "Please complete all text fields.",
+              );
+              return false;
             }
           }
         }
-        */
         return true;
       default:
         return true;
@@ -275,6 +290,18 @@ class RecoveryTaskController extends GetxController {
 
   void finishRecovery() {
     // Logic to save completion would go here (e.g. database or API)
+
+    // Save to local storage
+    final dateKey = _getDateKey(selectedDate.value);
+    _storage.writeString(dateKey, 'true');
+    isDailyCompleted.value = true;
+
+    // Update overview steps to show completion
+    for (var step in overviewSteps) {
+      step.isCompleted = true;
+    }
+    overviewSteps.refresh();
+
     Get.back();
     Get.snackbar(
       "Recovery Complete",
@@ -284,6 +311,10 @@ class RecoveryTaskController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       margin: EdgeInsets.all(16),
     );
+  }
+
+  String _getDateKey(DateTime date) {
+    return "recovery_completed_${date.year}-${date.month}-${date.day}";
   }
 
   // Helpers
