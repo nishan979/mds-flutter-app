@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../data/recovery_templates.dart';
 
 class RecoveryTaskStep {
   String title;
@@ -21,33 +22,21 @@ class RecoveryTaskController extends GetxController {
 
   final Rx<DateTime> selectedDate = DateTime.now().obs;
 
-  // Overview Page Data
-  final RxList<RecoveryTaskStep> overviewSteps = <RecoveryTaskStep>[
-    RecoveryTaskStep(
-      title: "Identify Your Trigger",
-      subtitle: "Reflect on what caused the slip.",
-    ),
-    RecoveryTaskStep(
-      title: "Take 10 Deep Breaths",
-      subtitle: "Relax and clear your mind.",
-    ),
-    RecoveryTaskStep(
-      title: "Write a Quick Reflection",
-      subtitle: 'One sentence: "I slipped because..."',
-    ),
-    RecoveryTaskStep(
-      title: "Tidy Your Space",
-      subtitle: "5 minutes to declutter your area.",
-    ),
-    RecoveryTaskStep(
-      title: "Start a 20-Minute Focus Block",
-      subtitle: "Engage in a distraction-free task.",
-    ),
-  ].obs;
+  // Dynamic Template Loading
+  // Initialize with a fallback to avoid late initialization errors if referenced early
+  late Rx<RecoveryTaskTemplate> dailyTemplate = kRecoveryTemplates[0].obs;
 
-  // --- Wizard State ---
+  // State for Dynamic Steps (Key = step.id, Value = dynamic)
+  final RxMap<String, dynamic> stepStates = <String, dynamic>{}.obs;
+  final Map<String, Timer?> _activeTimers = {};
 
-  // Step 1: Identify Slip
+  // Controllers for text inputs (Key = step.id)
+  final Map<String, TextEditingController> textControllers = {};
+
+  // Overview Page Data (Mapped from Template)
+  final RxList<RecoveryTaskStep> overviewSteps = <RecoveryTaskStep>[].obs;
+
+  // --- Wizard Step 1 & 2 State (Standard for all) ---
   final RxString selectedSlip = ''.obs;
   final List<String> slips = [
     "Broke Focus Mode",
@@ -57,7 +46,6 @@ class RecoveryTaskController extends GetxController {
     "Late-night scrolling",
   ];
 
-  // Step 2: Choose Trigger
   final RxString selectedTrigger = ''.obs;
   final List<String> triggers = [
     "Stress / anxiety",
@@ -69,34 +57,81 @@ class RecoveryTaskController extends GetxController {
     "\"Just checking something\" (gateway behaviour)",
   ];
 
-  // Step 3: Recovery Protocol
-  final RxBool dndActivated = false.obs;
-  final RxBool breathingCompleted = false.obs;
-  final RxInt breathingSeconds = 60.obs;
-  Timer? _breathingTimer;
-  final RxBool isBreathing = false.obs;
-
-  final TextEditingController sentenceController = TextEditingController();
-
-  final RxString selectedRepairAction = ''.obs;
-  final List<String> repairActions = [
-    "Tidy your workspace",
-    "5-minute reading",
-    "Step outside for 5 minutes",
-  ];
-
-  final RxString selectedFocusPreset = ''.obs;
-  final RxBool focusPresetActivated = false.obs;
-
-  // General
+  // General Reflection (Step 4 / Overview)
   final TextEditingController reflectionController = TextEditingController();
 
   @override
+  void onInit() {
+    super.onInit();
+    _loadDailyTask();
+
+    // Watch for date changes to reload task
+    ever(selectedDate, (_) => _loadDailyTask());
+  }
+
+  @override
   void onClose() {
-    sentenceController.dispose();
+    for (var c in textControllers.values) {
+      c.dispose();
+    }
     reflectionController.dispose();
-    _breathingTimer?.cancel();
+    for (var t in _activeTimers.values) {
+      t?.cancel();
+    }
     super.onClose();
+  }
+
+  void _loadDailyTask() {
+    // 1. Calculate Day of Year Index
+    // Ideally use day of year (1-365).
+    // Simplified: Difference in days from start of year.
+    final startOfYear = DateTime(selectedDate.value.year, 1, 1);
+    final diff = selectedDate.value.difference(startOfYear).inDays;
+    // Handle slightly negative diff if timezone issues occur, though unlikely with date objects
+    final dayIndex = diff < 0 ? 0 : diff;
+
+    // 2. Rotate Templates
+    // Use modulo to cycle through available templates
+    final templateIndex = dayIndex % kRecoveryTemplates.length;
+    final template = kRecoveryTemplates[templateIndex];
+
+    dailyTemplate.value = template;
+
+    // 3. Initialize Step States
+    stepStates.clear();
+
+    // Clean up old controllers
+    for (var c in textControllers.values) {
+      c.dispose();
+    }
+    textControllers.clear();
+
+    for (var t in _activeTimers.values) {
+      t?.cancel();
+    }
+    _activeTimers.clear();
+
+    for (var step in template.steps) {
+      if (step.type == RecoveryStepType.toggle) {
+        stepStates[step.id] = false;
+      } else if (step.type == RecoveryStepType.checkbox) {
+        stepStates[step.id] = false;
+      } else if (step.type == RecoveryStepType.timer) {
+        stepStates[step.id] = step.content as int; // Initial seconds
+        stepStates["${step.id}_isPlaying"] = false;
+      } else if (step.type == RecoveryStepType.textInput) {
+        textControllers[step.id] = TextEditingController();
+        stepStates[step.id] = "";
+      } else if (step.type == RecoveryStepType.choice) {
+        stepStates[step.id] = "";
+      }
+    }
+
+    // 4. Map to Overview
+    // Overview steps should show the actions the user will take
+    overviewSteps.value = template.steps
+        .map((s) => RecoveryTaskStep(title: s.title, subtitle: s.subtitle))
+        .toList();
   }
 
   void startRecovery() {
@@ -127,13 +162,15 @@ class RecoveryTaskController extends GetxController {
   }
 
   void nextDay() {
-    selectedDate.value = selectedDate.value.add(Duration(days: 1));
+    final now = DateTime.now();
+    final tomorrow = selectedDate.value.add(Duration(days: 1));
+
+    if (tomorrow.isBefore(now) || DateUtils.isSameDay(tomorrow, now)) {
+      selectedDate.value = tomorrow;
+    }
   }
 
-  // Also allow toggling on the overview page for interactivity?
-  // The user prompt implies the "4 steps will be shown" AFTER clicking.
-  // So the overview might just be static or a preview.
-  // Let's allow toggling just in case, but it doesn't affect the wizard flow.
+  // Toggle Overview Step (Visual only for now)
   void toggleOverviewStep(int index) {
     var step = overviewSteps[index];
     step.isCompleted = !step.isCompleted;
@@ -144,90 +181,100 @@ class RecoveryTaskController extends GetxController {
     switch (currentStep.value) {
       case 1:
         if (selectedSlip.isEmpty) {
-          Get.snackbar(
+          _showError(
             "Select a Slip",
             "Please select what happened to continue.",
-            backgroundColor: Colors.orange.withOpacity(0.8),
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.all(16),
           );
           return false;
         }
         return true;
       case 2:
         if (selectedTrigger.isEmpty) {
-          Get.snackbar(
+          _showError(
             "Select a Trigger",
             "Please select a trigger to continue.",
-            backgroundColor: Colors.orange.withOpacity(0.8),
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.all(16),
           );
           return false;
         }
         return true;
       case 3:
-        if (sentenceController.text.trim().isEmpty) {
-          Get.snackbar(
-            "Reflection Needed",
-            "Please write one sentence about why you slipped.",
-            backgroundColor: Colors.orange.withOpacity(0.8),
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.all(16),
-          );
-          return false;
+        // Basic validation for text inputs if they exist
+        // Iterate through steps and check if required fields are filled?
+        // For now, let's just let them proceed unless it's critical.
+        // We can enforce text fields if we want.
+        /*
+        for (var step in dailyTemplate.value.steps) {
+          if (step.type == RecoveryStepType.textInput) {
+            if (textControllers[step.id]?.text.trim().isEmpty ?? true) {
+               _showError("Reflection Needed", "Please complete all text fields.");
+               return false;
+            }
+          }
         }
+        */
         return true;
       default:
         return true;
     }
   }
 
-  // Logic for Step 3 Actions
-  void toggleDND() {
-    dndActivated.value = !dndActivated.value;
-    if (dndActivated.value) {
-      Get.snackbar(
-        "DND Activated",
-        "Do Not Disturb logic would trigger here.",
-        backgroundColor: Colors.blueAccent.withOpacity(0.8),
-        colorText: Colors.white,
-        duration: Duration(seconds: 1),
-      );
-    }
+  void _showError(String title, String msg) {
+    Get.snackbar(
+      title,
+      msg,
+      backgroundColor: Colors.orange.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: EdgeInsets.all(16),
+    );
   }
 
-  void startBreathing() {
-    if (isBreathing.value) return;
-    if (breathingSeconds.value == 0) {
-      breathingSeconds.value = 60; // reset
-    }
+  // --- Dynamic Step Actions (Called from View) ---
 
-    isBreathing.value = true;
-    _breathingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (breathingSeconds.value > 0) {
-        breathingSeconds.value--;
-      } else {
-        _breathingTimer?.cancel();
-        isBreathing.value = false;
-        breathingCompleted.value = true;
+  void toggleStep(String stepId) {
+    bool current = stepStates[stepId] ?? false;
+    stepStates[stepId] = !current;
+  }
+
+  void updateChoice(String stepId, String choice) {
+    stepStates[stepId] = choice;
+  }
+
+  void toggleTimer(String stepId) {
+    bool isPlaying = stepStates["${stepId}_isPlaying"] ?? false;
+    int currentSeconds = stepStates[stepId] as int;
+
+    if (isPlaying) {
+      // Pause
+      _activeTimers[stepId]?.cancel();
+      stepStates["${stepId}_isPlaying"] = false;
+    } else {
+      // Start
+      if (currentSeconds <= 0) {
+        // Reset if 0 (find original duration from template)
+        final step = dailyTemplate.value.steps.firstWhere(
+          (s) => s.id == stepId,
+        );
+        currentSeconds = step.content as int;
+        stepStates[stepId] = currentSeconds;
       }
-    });
-  }
 
-  void selectRepairAction(String action) {
-    selectedRepairAction.value = action;
-  }
-
-  void selectFocusPreset() {
-    selectedFocusPreset.value = "Deep Work";
-    focusPresetActivated.value = true;
+      stepStates["${stepId}_isPlaying"] = true;
+      _activeTimers[stepId] = Timer.periodic(Duration(seconds: 1), (timer) {
+        int current = stepStates[stepId] as int;
+        if (current > 0) {
+          stepStates[stepId] = current - 1;
+        } else {
+          timer.cancel();
+          stepStates["${stepId}_isPlaying"] = false;
+          // Could enable auto-complete or checkmark here
+        }
+      });
+    }
   }
 
   void finishRecovery() {
+    // Logic to save completion would go here (e.g. database or API)
     Get.back();
     Get.snackbar(
       "Recovery Complete",
@@ -239,12 +286,19 @@ class RecoveryTaskController extends GetxController {
     );
   }
 
-  String get breathingTimerString {
-    final minutes = (breathingSeconds.value / 60).floor().toString().padLeft(
-      2,
-      '0',
-    );
-    final seconds = (breathingSeconds.value % 60).toString().padLeft(2, '0');
-    return "$minutes:$seconds";
+  // Helpers
+  bool isTimerPlaying(String stepId) {
+    return stepStates["${stepId}_isPlaying"] ?? false;
+  }
+
+  TextEditingController? getTextController(String stepId) {
+    return textControllers[stepId];
+  }
+
+  String getTimerString(String stepId) {
+    int seconds = stepStates[stepId] ?? 0;
+    final m = (seconds / 60).floor().toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return "$m:$s";
   }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 
 import '../controllers/recovery_task_controller.dart';
+import '../data/recovery_templates.dart'; // Import for Enums
 
 class RecoveryTaskView extends GetView<RecoveryTaskController> {
   const RecoveryTaskView({super.key});
@@ -56,6 +57,9 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
 
   // --- Overview Page (Step 0) ---
   Widget _buildOverviewPage() {
+    // Ensure template is loaded
+    final template = controller.dailyTemplate.value;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -67,7 +71,8 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
 
           // Title Section
           Text(
-            "Today’s Recovery Session",
+            template.title, // Dynamic Title
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
               fontSize: 22.sp,
@@ -83,7 +88,8 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
           ),
           SizedBox(height: 6.h),
           Text(
-            "Bounce Back & Regain Focus",
+            template.description, // Dynamic Description
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
               fontSize: 14.sp,
@@ -111,9 +117,9 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               children: [
-                _buildOverviewStepsCard(),
+                _buildOverviewStepsCard(template),
                 SizedBox(height: 16.h),
-                _buildOverviewReflectionCard(),
+                _buildOverviewReflectionCard(template),
                 SizedBox(height: 20.h),
                 _buildScoreBoostPill(),
                 SizedBox(height: 20.h),
@@ -125,7 +131,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
     );
   }
 
-  Widget _buildOverviewStepsCard() {
+  Widget _buildOverviewStepsCard(RecoveryTaskTemplate template) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -172,10 +178,22 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
                           color: Colors.grey.shade400,
                           width: 2,
                         ),
-                        color: Colors
-                            .transparent, // Preview mode, unchecked or static
+                        // Visual check if toggled in overview (optional interactivity)
+                        color: step.isCompleted
+                            ? Color(0xFF2E7BE2)
+                            : Colors.transparent,
                       ),
-                      child: SizedBox(width: 14.sp, height: 14.sp),
+                      child: SizedBox(
+                        width: 14.sp,
+                        height: 14.sp,
+                        child: step.isCompleted
+                            ? Icon(
+                                Icons.check,
+                                size: 10.sp,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
@@ -221,7 +239,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
                 shadowColor: Color(0xFF1E60C9).withOpacity(0.4),
               ),
               child: Text(
-                "Complete Recovery (7 minutes)",
+                "Complete Recovery (${template.estimatedMinutes} minutes)",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14.sp,
@@ -235,7 +253,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
     );
   }
 
-  Widget _buildOverviewReflectionCard() {
+  Widget _buildOverviewReflectionCard(RecoveryTaskTemplate template) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -257,7 +275,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
           Divider(color: Colors.grey.withOpacity(0.2)),
           SizedBox(height: 8.h),
           Text(
-            "What did you learn from today's slip?",
+            template.reflectionPrompt, // Dynamic Prompt
             style: TextStyle(color: Colors.grey.shade700, fontSize: 13.sp),
           ),
           SizedBox(height: 12.h),
@@ -372,8 +390,12 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
         ),
 
         // Footer: Reflection (Visible on steps 1, 2, 3)
+        // Note: For Step 3, reflection might be part of the dynamic steps, so maybe hide footer there?
+        // The original design had a persistent footer. Let's keep it for Step 1 & 2, but
+        // if Step 3 has a text input, having another input at the bottom is confusing.
+        // Let's hide it for step 3 if the template has text inputs.
         Obx(
-          () => controller.currentStep.value < 4
+          () => controller.currentStep.value < 3
               ? Padding(
                   padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
                   child: _buildReflectionCard(),
@@ -476,12 +498,14 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
     );
   }
 
-  // STEP 3: Run the Recovery Protocol
+  // STEP 3: Run the Recovery Protocol (Dynamic)
   Widget _buildRecoveryProtocol() {
+    final template = controller.dailyTemplate.value;
+
     return Column(
       children: [
         Text(
-          "Run the Recovery Protocol",
+          template.title,
           style: TextStyle(
             color: Colors.white,
             fontSize: 22.sp,
@@ -507,154 +531,15 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. DND
-              _buildProtocolItem(
-                isCompleted: controller.dndActivated.value,
-                title: "Put Your Phone on Do Not Disturb",
-                subtitle: "Finish restart & stress DND.",
-                trailing: ElevatedButton(
-                  onPressed: controller.toggleDND,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: controller.dndActivated.value
-                        ? Colors.grey
-                        : Color(0xFF1E60C9),
-                    minimumSize: Size(100.w, 36.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.r),
-                    ),
-                  ),
-                  child: Text(
-                    controller.dndActivated.value ? "Active" : "Activate DND",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: controller.dndActivated.value
-                          ? Colors.white
-                          : Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              Divider(),
-
-              // 2. Breathing
-              _buildProtocolItem(
-                isCompleted: controller.breathingCompleted.value,
-                title: "Take 10 Slow Breaths",
-                subtitle: "Relax for a minute.",
-                trailing: GestureDetector(
-                  onTap: controller.startBreathing,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          controller.breathingTimerString,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14.sp,
-                            color: Color(0xFF2E2E6A),
-                          ),
-                        ),
-                        Text(
-                          controller.isBreathing.value
-                              ? "Breathing..."
-                              : "Start",
-                          style: TextStyle(fontSize: 10.sp, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Divider(),
-
-              // 3. Sentence
-              _buildProtocolItem(
-                isCompleted: controller.sentenceController.text.isNotEmpty,
-                title: "Write 1 Sentence: \"I slipped because...\"",
-                subtitle: "I slipped because...",
-                customBody: TextField(
-                  controller: controller.sentenceController,
-                  decoration: InputDecoration(
-                    hintText: "Type reason here...",
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8.h),
-                    border: InputBorder.none,
-                  ),
-                  style: TextStyle(fontSize: 13.sp),
-                  onChanged: (val) {
-                    // trigger rebuild if needed or just let state be
-                    controller.sentenceController.text = val;
-                    // Hack to force UI update for checkbox if we were strictly observing
-                  },
-                ),
-              ),
-              Divider(),
-
-              // 4. Repair Action
-              _buildProtocolItem(
-                isCompleted: controller.selectedRepairAction.isNotEmpty,
-                title: "Pick One Repair Action",
-                subtitle: null,
-                customBody: Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
-                  children: controller.repairActions.map((action) {
-                    final isSelected =
-                        controller.selectedRepairAction.value == action;
-                    return ChoiceChip(
-                      label: Text(
-                        action,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (selected) =>
-                          controller.selectRepairAction(action),
-                      selectedColor: Color(0xFF1E60C9),
-                      backgroundColor: Colors.grey.shade200,
-                    );
-                  }).toList(),
-                ),
-              ),
-              Divider(),
-
-              // 5. Focus Preset
-              _buildProtocolItem(
-                isCompleted: controller.focusPresetActivated.value,
-                title: "Activate a Focus Preset (20 mins)",
-                subtitle: null,
-                trailing: ElevatedButton(
-                  onPressed: controller.selectFocusPreset,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF1E60C9),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.r),
-                    ),
-                  ),
-                  child: Text(
-                    "Select Focus Preset",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: controller.focusPresetActivated.value
-                          ? Colors.white
-                          : Colors.white,
-                    ),
-                  ),
-                ),
-              ),
+              // Dynamic List of Steps
+              ...template.steps.map((step) {
+                return Column(
+                  children: [
+                    _buildDynamicStep(step),
+                    Divider(height: 24.h),
+                  ],
+                );
+              }).toList(),
 
               SizedBox(height: 24.h),
               _buildContinueButton(
@@ -666,6 +551,115 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
         ),
       ],
     );
+  }
+
+  Widget _buildDynamicStep(RecoveryStepData step) {
+    switch (step.type) {
+      case RecoveryStepType.toggle:
+      case RecoveryStepType.checkbox:
+        return Obx(() {
+          final isChecked = controller.stepStates[step.id] == true;
+          return _buildProtocolItem(
+            isCompleted: isChecked,
+            title: step.title,
+            subtitle: step.subtitle,
+            trailing: Checkbox(
+              value: isChecked,
+              activeColor: Color(0xFF1E60C9),
+              onChanged: (val) => controller.toggleStep(step.id),
+            ),
+          );
+        });
+
+      case RecoveryStepType.timer:
+        return Obx(() {
+          final isPlaying = controller.isTimerPlaying(step.id);
+          final seconds = controller.stepStates[step.id] as int? ?? 0;
+          return _buildProtocolItem(
+            isCompleted: seconds == 0,
+            title: step.title,
+            subtitle: step.subtitle,
+            trailing: GestureDetector(
+              onTap: () => controller.toggleTimer(step.id),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: isPlaying ? Color(0xFFE3F2FD) : Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      controller.getTimerString(step.id),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                        color: Color(0xFF2E2E6A),
+                      ),
+                    ),
+                    Text(
+                      isPlaying ? "Pause" : "Start",
+                      style: TextStyle(fontSize: 10.sp, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+
+      case RecoveryStepType.textInput:
+        return _buildProtocolItem(
+          isCompleted: true, // Always show as available
+          title: step.title,
+          subtitle: step.subtitle,
+          customBody: TextField(
+            controller: controller.getTextController(step.id),
+            decoration: InputDecoration(
+              hintText: "Type response here...",
+              isDense: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            maxLines: null,
+            style: TextStyle(fontSize: 13.sp),
+          ),
+        );
+
+      case RecoveryStepType.choice:
+        return Obx(() {
+          final isSelected = controller.stepStates[step.id] != "";
+          final List<String> options = step.content as List<String>;
+
+          return _buildProtocolItem(
+            isCompleted: isSelected,
+            title: step.title,
+            subtitle: step.subtitle,
+            customBody: Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: options.map((opt) {
+                final active = controller.stepStates[step.id] == opt;
+                return ChoiceChip(
+                  label: Text(opt),
+                  selected: active,
+                  onSelected: (val) => controller.updateChoice(step.id, opt),
+                  selectedColor: Color(0xFF1E60C9),
+                  labelStyle: TextStyle(
+                    color: active ? Colors.white : Colors.black,
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        });
+    }
   }
 
   // STEP 4: Recovery Complete
@@ -722,8 +716,6 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
         ),
         SizedBox(height: 20.h),
         _buildScoreBoostPill(),
-        SizedBox(height: 20.h),
-        _buildReflectionCard(readOnly: true),
       ],
     );
   }
@@ -792,67 +784,73 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
   }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.only(top: 4.h),
-            height: 18.w,
-            width: 18.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isCompleted ? Color(0xFF2E7BE2) : Colors.grey.shade400,
-                width: 2,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: 4.h),
+                height: 18.w,
+                width: 18.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isCompleted ? Color(0xFF1E60C9) : Colors.transparent,
+                  border: Border.all(
+                    color: isCompleted
+                        ? Color(0xFF1E60C9)
+                        : Colors.grey.shade400,
+                    width: 2,
+                  ),
+                ),
+                child: isCompleted
+                    ? Icon(Icons.check, size: 12.sp, color: Colors.white)
+                    : null,
               ),
-              color: isCompleted ? Color(0xFF2E7BE2) : Colors.white,
-            ),
-            child: isCompleted
-                ? Icon(Icons.check, size: 12.sp, color: Colors.white)
-                : null,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF2E2E6A),
-                            ),
-                          ),
-                          if (subtitle != null)
-                            Text(
-                              subtitle,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                        ],
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2E2E6A),
+                        decoration:
+                            isCompleted &&
+                                trailing == null &&
+                                customBody ==
+                                    null // Strike through only if it's a simple checkbox
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
-                    if (trailing != null) trailing,
+                    if (subtitle != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                if (customBody != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.h),
-                    child: customBody,
-                  ),
-              ],
-            ),
+              ),
+              if (trailing != null) trailing,
+            ],
           ),
+          if (customBody != null) ...[
+            SizedBox(height: 12.h),
+            Padding(
+              padding: EdgeInsets.only(left: 30.w),
+              child: customBody,
+            ),
+          ],
         ],
       ),
     );
@@ -860,17 +858,8 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
 
   Widget _buildCheckItem(String title, String subtitle) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          margin: EdgeInsets.only(top: 2.h),
-          decoration: BoxDecoration(
-            color: Colors.green,
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-          padding: EdgeInsets.all(2),
-          child: Icon(Icons.check, color: Colors.white, size: 12.sp),
-        ),
+        Icon(Icons.check_circle, color: Colors.green, size: 24.sp),
         SizedBox(width: 12.w),
         Expanded(
           child: Column(
@@ -880,7 +869,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
                 title,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                   color: Color(0xFF2E2E6A),
                 ),
               ),
@@ -934,47 +923,37 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Today’s Reflection:",
-            style: TextStyle(
-              color: Color(0xFF2E2E6A),
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Divider(color: Colors.grey.withOpacity(0.2)),
-          SizedBox(height: 8.h),
-          Text(
-            readOnly
-                ? controller.sentenceController.text
-                : "What did you learn from today's slip?",
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 13.sp),
-          ),
-          if (!readOnly) ...[
-            SizedBox(height: 12.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: Color(0xFFF0F4F8),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: TextField(
-                controller: controller.reflectionController,
-                maxLines: 3,
-                style: TextStyle(fontSize: 13.sp, color: Colors.black87),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Type your thoughts...",
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 13.sp,
-                  ),
+          Row(
+            children: [
+              Icon(Icons.edit_note, color: Colors.orange, size: 20.sp),
+              SizedBox(width: 8.w),
+              Text(
+                "Quick Reflection",
+                style: TextStyle(
+                  color: Color(0xFF2E2E6A),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          TextField(
+            controller: controller.reflectionController,
+            enabled: !readOnly,
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: "How are you feeling right now?",
+              filled: true,
+              fillColor: Color(0xFFF0F4F8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: EdgeInsets.all(12.w),
             ),
-          ],
+            style: TextStyle(fontSize: 13.sp),
+          ),
         ],
       ),
     );
@@ -984,20 +963,21 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        color: Color(0xFF00C853).withOpacity(0.2),
         borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: Color(0xFF00C853).withOpacity(0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.arrow_upward, color: Colors.green, size: 16.sp),
-          SizedBox(width: 4.w),
+          Icon(Icons.bolt, color: Color(0xFF2E7D32), size: 16.sp),
+          SizedBox(width: 6.w),
           Text(
-            "+2 Points to Anti-SMUB",
+            "Complete now to restore score",
             style: TextStyle(
-              color: Color(0xFF2E2E6A),
-              fontWeight: FontWeight.w600,
+              color: Color(0xFF2E7D32),
               fontSize: 12.sp,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
