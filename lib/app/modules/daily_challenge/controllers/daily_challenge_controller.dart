@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../services/storage/storage_service.dart';
 import '../../../services/challenge_service.dart';
 import '../../../data/models/daily_challenge_model.dart';
+import '../views/challenge_completion_view.dart';
 
 class DailyChallengeController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
@@ -13,6 +14,7 @@ class DailyChallengeController extends GetxController {
   // Timer for the challenge itself (optional usage)
   Timer? _countdownTimer;
   final RxInt challengeDurationSeconds = (60 * 60).obs; // Default 60 mins
+  final RxInt initialChallengeDurationSeconds = (60 * 60).obs;
   final RxString challengeTimerDisplay = "60:00".obs;
   final RxBool isChallengeRunning = false.obs;
 
@@ -21,6 +23,8 @@ class DailyChallengeController extends GetxController {
   final RxBool isCheckInDone = false.obs;
   final RxBool challengeActive = false.obs;
   final RxString reflectionText = ''.obs;
+  final RxBool isTimerPaused = false.obs;
+  final RxInt pointsEarned = 0.obs;
 
   // Daily Rotation from JSON
   final Rx<DailyChallenge?> todaysChallengeData = Rx<DailyChallenge?>(null);
@@ -145,6 +149,8 @@ class DailyChallengeController extends GetxController {
         // Set challenge duration
         int duration = todaysChallenge['duration_seconds'] ?? 3600;
         challengeDurationSeconds.value = duration;
+        initialChallengeDurationSeconds.value = duration;
+        _updateTimerDisplay();
       } else {
         print("No challenge found for today");
         // Set default/empty challenge
@@ -321,6 +327,9 @@ class DailyChallengeController extends GetxController {
     return (_storage.readInt('challenge_completion_$todayKey') ?? 0) == 1;
   }
 
+  bool get isChecklistComplete =>
+      checklist.isNotEmpty && checklist.every((item) => item);
+
   void toggleCheckItem(int index) {
     if (index >= 0 && index < checklist.length) {
       checklist[index] = !checklist[index];
@@ -330,32 +339,93 @@ class DailyChallengeController extends GetxController {
   void startChallenge() {
     if (isChallengeRunning.value) return;
 
-    // Reset checklist state for clean start
-    final items = todaysChallenge['checklistItems'];
-    if (items is List) {
-      checklist.assignAll(List.generate(items.length, (_) => false));
+    if (!isChecklistComplete) {
+      Get.snackbar(
+        "Almost there",
+        "Please complete all checklist items before starting.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.withOpacity(0.85),
+        colorText: Colors.white,
+      );
+      return;
     }
 
     // Set duration from challenge data
-    int duration = todaysChallenge['duration_seconds'] ?? 60;
-    challengeDurationSeconds.value = duration;
+    challengeDurationSeconds.value = initialChallengeDurationSeconds.value;
     isChallengeRunning.value = true;
+    isTimerPaused.value = false;
 
-    Get.back(); // close start view
-    // Start background timer notification if needed
-    Get.snackbar("Started", "Timer started in background!");
+    _startTimer();
+  }
 
+  void setChallengeDurationMinutes(int minutes) {
+    if (isChallengeRunning.value) return;
+    final seconds = minutes * 60;
+    initialChallengeDurationSeconds.value = seconds;
+    challengeDurationSeconds.value = seconds;
+    _updateTimerDisplay();
+  }
+
+  void _startTimer() {
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (challengeDurationSeconds.value > 0) {
+      if (!isTimerPaused.value && challengeDurationSeconds.value > 0) {
         challengeDurationSeconds.value--;
         _updateTimerDisplay();
-      } else {
+      } else if (challengeDurationSeconds.value == 0 &&
+          isChallengeRunning.value) {
         timer.cancel();
-        isChallengeRunning.value = false;
-        checkIn(); // Auto complete when timer ends
+        _completeChallenge();
       }
     });
+  }
+
+  void pauseResumeTimer() {
+    isTimerPaused.toggle();
+    if (!isTimerPaused.value) {
+      // Resume timer
+      _startTimer();
+    }
+  }
+
+  void skipChallenge() {
+    _countdownTimer?.cancel();
+    isChallengeRunning.value = false;
+    isTimerPaused.value = false;
+    challengeDurationSeconds.value = initialChallengeDurationSeconds.value;
+    _updateTimerDisplay();
+  }
+
+  void _completeChallenge() {
+    _countdownTimer?.cancel();
+    isChallengeRunning.value = false;
+    isTimerPaused.value = false;
+
+    // Calculate points earned
+    final totalCheckInPoints = todaysChallenge['check_in']?['points'] ?? 0;
+    final totalMainPoints = todaysChallenge['main_challenge']?['points'] ?? 0;
+    pointsEarned.value =
+        ((totalCheckInPoints as int?) ?? 0) + ((totalMainPoints as int?) ?? 0);
+
+    checkIn();
+
+    // Show completion screen
+    Get.to(() => const ChallengeCompletionView());
+  }
+
+  void completeChallenge() {
+    _countdownTimer?.cancel();
+    isChallengeRunning.value = false;
+    isTimerPaused.value = false;
+
+    // Calculate points earned
+    final totalCheckInPoints = todaysChallenge['check_in']?['points'] ?? 0;
+    final totalMainPoints = todaysChallenge['main_challenge']?['points'] ?? 0;
+    pointsEarned.value =
+        ((totalCheckInPoints as int?) ?? 0) + ((totalMainPoints as int?) ?? 0);
+
+    checkIn();
+    Get.to(() => const ChallengeCompletionView());
   }
 
   void _updateTimerDisplay() {

@@ -35,11 +35,13 @@ class StartChallengeView extends GetView<DailyChallengeController> {
               border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
               color: Colors.black26,
             ),
-            child: Text(
-              "${controller.streakCount.value}",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+            child: Obx(
+              () => Text(
+                "${controller.streakCount.value}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -71,6 +73,76 @@ class StartChallengeView extends GetView<DailyChallengeController> {
                             fontSize: 13.sp,
                           ),
                         ),
+                        SizedBox(height: 16.h),
+
+                        Obx(() {
+                          final main =
+                              controller.todaysChallenge['main_challenge'];
+                          final checkIn =
+                              controller.todaysChallenge['check_in'];
+                          final title = main is Map
+                              ? (main['title']?.toString() ??
+                                    'Today\'s Challenge')
+                              : 'Today\'s Challenge';
+                          final description = main is Map
+                              ? (main['description']?.toString() ?? '')
+                              : '';
+                          final verification = main is Map
+                              ? (main['verification_method']?.toString() ?? '')
+                              : '';
+                          final checkInTitle = checkIn is Map
+                              ? (checkIn['title']?.toString() ?? 'Check-in')
+                              : 'Check-in';
+
+                          return Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(14.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  description,
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                Text(
+                                  "Check-in: $checkInTitle",
+                                  style: TextStyle(
+                                    color: const Color(0xFFDEB988),
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                                if (verification.isNotEmpty) ...[
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    "Verify: $verification",
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 11.sp,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        }),
                         SizedBox(height: 32.h),
 
                         // Timer Section
@@ -123,16 +195,7 @@ class StartChallengeView extends GetView<DailyChallengeController> {
                                         title: Text("30 minutes"),
                                         onTap: () {
                                           controller
-                                                  .todaysChallenge['duration'] =
-                                              "30 minutes";
-                                          controller
-                                                  .challengeDurationSeconds
-                                                  .value =
-                                              1800;
-                                          controller
-                                                  .challengeTimerDisplay
-                                                  .value =
-                                              "30:00";
+                                              .setChallengeDurationMinutes(30);
                                           Get.back();
                                         },
                                       ),
@@ -140,16 +203,7 @@ class StartChallengeView extends GetView<DailyChallengeController> {
                                         title: Text("45 minutes"),
                                         onTap: () {
                                           controller
-                                                  .todaysChallenge['duration'] =
-                                              "45 minutes";
-                                          controller
-                                                  .challengeDurationSeconds
-                                                  .value =
-                                              2700;
-                                          controller
-                                                  .challengeTimerDisplay
-                                                  .value =
-                                              "45:00";
+                                              .setChallengeDurationMinutes(45);
                                           Get.back();
                                         },
                                       ),
@@ -157,16 +211,7 @@ class StartChallengeView extends GetView<DailyChallengeController> {
                                         title: Text("60 minutes"),
                                         onTap: () {
                                           controller
-                                                  .todaysChallenge['duration'] =
-                                              "60 minutes";
-                                          controller
-                                                  .challengeDurationSeconds
-                                                  .value =
-                                              3600;
-                                          controller
-                                                  .challengeTimerDisplay
-                                                  .value =
-                                              "60:00";
+                                              .setChallengeDurationMinutes(60);
                                           Get.back();
                                         },
                                       ),
@@ -222,22 +267,91 @@ class StartChallengeView extends GetView<DailyChallengeController> {
                   width: double.infinity,
                   height: 56.h,
                   margin: EdgeInsets.all(20.w),
-                  child: ElevatedButton(
-                    onPressed: controller.startChallenge,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E2E6A).withOpacity(0.8),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28.r),
-                        side: BorderSide(color: Colors.white24),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      "START CHALLENGE",
-                      style: TextStyle(fontSize: 16.sp, letterSpacing: 1.2),
-                    ),
-                  ),
+                  child: Obx(() {
+                    if (!controller.isChallengeRunning.value) {
+                      final canStart = controller.isChecklistComplete;
+                      return ElevatedButton(
+                        onPressed: canStart ? controller.startChallenge : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: canStart
+                              ? const Color(0xFF2E2E6A).withOpacity(0.8)
+                              : Colors.grey.withOpacity(0.4),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28.r),
+                            side: BorderSide(color: Colors.white24),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          canStart
+                              ? "START CHALLENGE"
+                              : "COMPLETE CHECKLIST TO START",
+                          style: TextStyle(
+                            fontSize: canStart ? 16.sp : 13.sp,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: controller.pauseResumeTimer,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(
+                                  0xFF9C27B0,
+                                ).withOpacity(0.8),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    controller.isTimerPaused.value
+                                        ? Icons.play_arrow
+                                        : Icons.pause,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    controller.isTimerPaused.value
+                                        ? "Resume"
+                                        : "Pause",
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: controller.completeChallenge,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFC107),
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                "Complete",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  }),
                 ),
               ],
             ),

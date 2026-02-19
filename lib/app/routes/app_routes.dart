@@ -18,6 +18,9 @@ abstract class Routes {
   static const FOCUS_MODE = _Paths.FOCUS_MODE;
   static const SET_FOCUS_GOAL = _Paths.SET_FOCUS_GOAL;
   static const DAILY_CHALLENGE = _Paths.DAILY_CHALLENGE;
+  static const CHALLENGE_LIBRARY = _Paths.CHALLENGE_LIBRARY;
+  static const CHALLENGE_MONTHS = _Paths.CHALLENGE_MONTHS;
+  static const DAILY_REFLECTION = _Paths.DAILY_REFLECTION;
   static const START_CHALLENGE = _Paths.START_CHALLENGE;
   static const RECOVERY_TASK = _Paths.RECOVERY_TASK;
 }
@@ -37,6 +40,9 @@ abstract class _Paths {
   static const FOCUS_MODE = '/focus-mode';
   static const SET_FOCUS_GOAL = '/set-focus-goal';
   static const DAILY_CHALLENGE = '/daily-challenge';
+  static const CHALLENGE_LIBRARY = '/challenge-library';
+  static const CHALLENGE_MONTHS = '/challenge-months';
+  static const DAILY_REFLECTION = '/daily-reflection';
   static const START_CHALLENGE = '/start-challenge';
   static const RECOVERY_TASK = '/recovery-task';
 }

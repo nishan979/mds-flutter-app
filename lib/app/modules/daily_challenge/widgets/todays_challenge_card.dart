@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/daily_challenge_controller.dart';
+import '../views/start_challenge_view.dart';
 
 class TodaysChallengeCard extends GetView<DailyChallengeController> {
   const TodaysChallengeCard({super.key});
@@ -310,21 +311,23 @@ class TodaysChallengeCard extends GetView<DailyChallengeController> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: controller.startChallenge,
+                  onPressed: () => Get.to(() => const StartChallengeView()),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    backgroundColor: const Color(0xFFFFC107),
+                    foregroundColor: Colors.black,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   child: Text(
                     'START CHALLENGE',
                     style: TextStyle(
                       color: Colors.black,
-                      fontSize: 14.sp,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+                      letterSpacing: 1.2,
                     ),
                   ),
                 ),

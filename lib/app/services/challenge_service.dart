@@ -183,8 +183,11 @@ class ChallengeService {
     }
 
     return _challengeData.challenges
-        .where((challenge) => challenge.month == month)
-        .toList();
+        .where(
+          (challenge) => dayOfYearToMonthDay(challenge.day)['month'] == month,
+        )
+        .toList()
+      ..sort((a, b) => a.day.compareTo(b.day));
   }
 
   /// Get all challenges (entire year)

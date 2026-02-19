@@ -337,7 +337,7 @@ class _SessionControlCard extends GetView<FocusModeController> {
                       ),
                       padding: EdgeInsets.zero,
                     ).copyWith(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                         Colors.transparent,
                       ),
                     ),

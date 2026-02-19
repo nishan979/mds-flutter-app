@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../controllers/daily_challenge_controller.dart';
 import '../widgets/challenge_stats_widget.dart';
 import '../widgets/todays_challenge_card.dart';
-import 'challenge_library_view.dart';
+import '../../../routes/app_pages.dart';
 
 class DailyChallengeView extends GetView<DailyChallengeController> {
   const DailyChallengeView({super.key});
@@ -89,22 +89,72 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
 
                   SizedBox(height: 24.h),
 
-                  // Challenge Library Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () =>
-                          Get.to(() => const ChallengeLibraryView()),
-                      icon: Icon(Icons.library_books, size: 20.sp),
-                      label: Text(
-                        'Browse All Challenges',
-                        style: TextStyle(fontSize: 14.sp),
+                  Text(
+                    'Reflection',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+
+                  Obx(() {
+                    final hasReflection = controller.reflectionText.value
+                        .trim()
+                        .isNotEmpty;
+                    return _OptionCard(
+                      icon: Icons.edit_note,
+                      title: hasReflection
+                          ? 'Update Reflection'
+                          : 'Write Reflection',
+                      subtitle: hasReflection
+                          ? controller.reflectionText.value
+                          : 'How did you feel during your challenge today?',
+                      actionLabel: hasReflection ? 'MANAGE' : 'WRITE',
+                      onTap: () => Get.toNamed(Routes.DAILY_REFLECTION),
+                    );
+                  }),
+
+                  SizedBox(height: 20.h),
+
+                  Text(
+                    'Challenge Library',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+
+                  _OptionCard(
+                    icon: Icons.library_books,
+                    title: 'Browse All Challenges',
+                    subtitle:
+                        'Explore every daily challenge by month, difficulty, and category.',
+                    actionLabel: 'OPEN',
+                    onTap: () => Get.toNamed(Routes.CHALLENGE_LIBRARY),
+                  ),
+
+                  SizedBox(height: 12.h),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => Get.toNamed(Routes.CHALLENGE_MONTHS),
+                      icon: Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white70,
+                        size: 16.sp,
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple.withOpacity(0.7),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                      label: Text(
+                        'VIEW ALL CHALLENGES',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11.sp,
+                          letterSpacing: 0.8,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -116,6 +166,91 @@ class DailyChallengeView extends GetView<DailyChallengeController> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  const _OptionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: Ink(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.06),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFC107).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, color: const Color(0xFFFFC107), size: 20.sp),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                actionLabel,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Icon(Icons.chevron_right, color: Colors.white54, size: 18.sp),
+            ],
+          ),
+        ),
       ),
     );
   }

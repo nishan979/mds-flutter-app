@@ -28,7 +28,7 @@ class ChallengeServiceUsageExample {
     final challenge = challengeService.getChallengeByDate(date);
     if (challenge != null) {
       print('Challenge for ${date.month}/${date.day}:');
-      print('${challenge.mainChallenge.title}');
+      print(challenge.mainChallenge.title);
     }
   }
 

@@ -147,8 +147,9 @@ class EditGoalPage extends GetView<SetFocusGoalController> {
                                   TextButton(
                                     onPressed: () {
                                       final v = tc.text.trim();
-                                      if (v.isNotEmpty)
+                                      if (v.isNotEmpty) {
                                         controller.selectIdentity(v);
+                                      }
                                       Get.back();
                                     },
                                     child: const Text(

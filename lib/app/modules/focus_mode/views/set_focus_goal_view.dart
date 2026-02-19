@@ -435,7 +435,7 @@ class FocusSetGoalView extends GetView<FocusModeController> {
   Widget _buildAddCustomGoalButton() {
     return GestureDetector(
       onTap: () {
-        final TextEditingController _textController = TextEditingController();
+        final TextEditingController textController = TextEditingController();
         Get.dialog(
           AlertDialog(
             backgroundColor: const Color(0xFF121212),
@@ -444,7 +444,7 @@ class FocusSetGoalView extends GetView<FocusModeController> {
               style: TextStyle(color: Colors.white),
             ),
             content: TextField(
-              controller: _textController,
+              controller: textController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 hintText: 'Enter goal',
@@ -462,7 +462,7 @@ class FocusSetGoalView extends GetView<FocusModeController> {
               ),
               TextButton(
                 onPressed: () {
-                  final val = _textController.text.trim();
+                  final val = textController.text.trim();
                   Get.back();
                   if (val.isNotEmpty) {
                     controller.addCustomSupportingGoal(val);

@@ -29,6 +29,9 @@ import '../modules/set_focus_goal/bindings/set_focus_goal_binding.dart';
 import '../modules/set_focus_goal/views/set_focus_goal_view.dart';
 import '../modules/daily_challenge/bindings/daily_challenge_binding.dart';
 import '../modules/daily_challenge/views/daily_challenge_view.dart';
+import '../modules/daily_challenge/views/challenge_library_view.dart';
+import '../modules/daily_challenge/views/challenge_months_view.dart';
+import '../modules/daily_challenge/views/daily_challenge_reflection_view.dart';
 import '../modules/recovery_task/bindings/recovery_task_binding.dart';
 import '../modules/recovery_task/views/recovery_task_view.dart';
 
@@ -113,6 +116,21 @@ class AppPages {
     GetPage(
       name: _Paths.DAILY_CHALLENGE,
       page: () => const DailyChallengeView(),
+      binding: DailyChallengeBinding(),
+    ),
+    GetPage(
+      name: _Paths.CHALLENGE_LIBRARY,
+      page: () => const ChallengeLibraryView(),
+      binding: DailyChallengeBinding(),
+    ),
+    GetPage(
+      name: _Paths.CHALLENGE_MONTHS,
+      page: () => const ChallengeMonthsView(),
+      binding: DailyChallengeBinding(),
+    ),
+    GetPage(
+      name: _Paths.DAILY_REFLECTION,
+      page: () => const DailyChallengeReflectionView(),
       binding: DailyChallengeBinding(),
     ),
     GetPage(

@@ -561,7 +561,7 @@ class RecoveryTaskView extends GetView<RecoveryTaskController> {
                     Divider(height: 24.h),
                   ],
                 );
-              }).toList(),
+              }),
 
               SizedBox(height: 24.h),
               _buildContinueButton(
