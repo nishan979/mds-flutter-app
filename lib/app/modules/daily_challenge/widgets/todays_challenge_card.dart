@@ -161,7 +161,94 @@ class TodaysChallengeCard extends GetView<DailyChallengeController> {
 
             SizedBox(height: 16.h),
 
-            // Difficulty and Category
+            // Points Summary
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.amber.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Points Breakdown',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Check-In',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11.sp,
+                        ),
+                      ),
+                      Text(
+                        '+${checkIn['points'] ?? 0} pts',
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Main Challenge',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11.sp,
+                        ),
+                      ),
+                      Text(
+                        '+${mainChallenge['points'] ?? 0} pts',
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(color: Colors.amber.withOpacity(0.2), height: 12.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '+${((checkIn['points'] as int?) ?? 0) + ((mainChallenge['points'] as int?) ?? 0)} pts',
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 16.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
