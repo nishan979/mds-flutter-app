@@ -7,10 +7,18 @@ import 'app/services/api/api_client.dart';
 import 'app/services/api/anti_smub_service.dart';
 import 'app/services/api/auth_service.dart';
 import 'app/services/storage/storage_service.dart';
+import 'app/services/challenge_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  // Initialize Challenge Service with error handling
+  try {
+    await ChallengeService().loadChallenges();
+  } catch (e) {
+    print("Warning: Failed to load challenges: $e");
+  }
 
   // Initialize API Client
   Get.put<ApiClient>(ApiClient());

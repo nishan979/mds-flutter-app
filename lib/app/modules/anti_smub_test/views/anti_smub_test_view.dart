@@ -127,6 +127,18 @@ class AntiSmubTestView extends GetView<AntiSmubTestController> {
                   SizedBox(height: 16.h),
 
                   _AssessmentCard(
+                    title: 'Focus Capacity Test',
+                    titleSuffix: '(Intermediate)',
+                    subtitle:
+                        'Assess attention endurance\nFor Students & Families',
+                    icon: Icons.psychology_outlined,
+                    onTap: () => controller.onTileClicked('focus'),
+                    isGoldIcon: true,
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  _AssessmentCard(
                     title: 'Full Assessment',
                     titleSuffix: '(Enterprise)',
                     subtitle:
@@ -145,17 +157,6 @@ class AntiSmubTestView extends GetView<AntiSmubTestController> {
                     onTap: () => controller.onTileClicked('recovery'),
                     isGoldIcon: true,
                     // The icon in screenshot has a specific look, using warning for now
-                  ),
-                  SizedBox(height: 16.h),
-
-                  _AssessmentCard(
-                    title: 'Focus Capacity Test',
-                    titleSuffix: '(Intermediate)',
-                    subtitle:
-                        'Assess attention endurance\nFor Students & Families',
-                    icon: Icons.psychology_outlined,
-                    onTap: () => controller.onTileClicked('focus'),
-                    isGoldIcon: true,
                   ),
 
                   SizedBox(height: 40.h),
