@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/daily_challenge_controller.dart';
-import '../bindings/daily_challenge_binding.dart';
-import '../../../routes/app_pages.dart';
 import '../widgets/challenge_stats_widget.dart';
 import '../widgets/todays_challenge_card.dart';
 import 'challenge_library_view.dart';
