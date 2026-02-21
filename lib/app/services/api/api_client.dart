@@ -45,6 +45,36 @@ class ApiClient extends GetxService {
     _authToken = null;
   }
 
+  String _normalizeEndpoint(String endpoint) {
+    var normalized = endpoint.trim();
+    if (!normalized.startsWith('/')) {
+      normalized = '/$normalized';
+    }
+
+    const apiPrefix = '/api/v1';
+    if (normalized == apiPrefix) {
+      return '/';
+    }
+    if (normalized.startsWith('$apiPrefix/')) {
+      normalized = normalized.substring(apiPrefix.length);
+    }
+    return normalized;
+  }
+
+  Map<String, String> _buildHeaders(Map<String, String>? headers) {
+    final usedHeaders = <String, String>{
+      ...ApiConstants.defaultHeaders,
+      ...?headers,
+    };
+
+    final token = _authToken ?? Get.find<StorageService>().token;
+    if (token != null && token.isNotEmpty) {
+      usedHeaders['Authorization'] = 'Bearer $token';
+    }
+
+    return usedHeaders;
+  }
+
   // GET request
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
@@ -52,12 +82,16 @@ class ApiClient extends GetxService {
     Map<String, String>? headers,
   }) async {
     try {
-      final url = '${_getConnect.httpClient.baseUrl}$endpoint';
+      final normalizedEndpoint = _normalizeEndpoint(endpoint);
+      final url = '${_getConnect.httpClient.baseUrl}$normalizedEndpoint';
       print('[API][GET] URL: $url');
-      final usedHeaders = headers ?? ApiConstants.defaultHeaders;
+      final usedHeaders = _buildHeaders(headers);
       print('[API][GET] Headers: $usedHeaders');
 
-      var response = await _getConnect.get(endpoint, headers: usedHeaders);
+      var response = await _getConnect.get(
+        normalizedEndpoint,
+        headers: usedHeaders,
+      );
 
       print('[API][GET] Status: ${response.statusCode}');
       print('[API][GET] Body: ${response.bodyString}');
@@ -68,9 +102,11 @@ class ApiClient extends GetxService {
         final refreshed = await auth.refreshToken();
         if (refreshed) {
           print('[API][GET] Refresh succeeded, retrying request');
-          usedHeaders['Authorization'] =
-              'Bearer ${Get.find<StorageService>().token}';
-          response = await _getConnect.get(endpoint, headers: usedHeaders);
+          final retryHeaders = _buildHeaders(usedHeaders);
+          response = await _getConnect.get(
+            normalizedEndpoint,
+            headers: retryHeaders,
+          );
           print('[API][GET] Retry Status: ${response.statusCode}');
           print('[API][GET] Retry Body: ${response.bodyString}');
         } else {
@@ -94,15 +130,16 @@ class ApiClient extends GetxService {
     Map<String, String>? headers,
   }) async {
     try {
-      final url = '${_getConnect.httpClient.baseUrl}$endpoint';
-      final usedHeaders = headers ?? ApiConstants.defaultHeaders;
+      final normalizedEndpoint = _normalizeEndpoint(endpoint);
+      final url = '${_getConnect.httpClient.baseUrl}$normalizedEndpoint';
+      final usedHeaders = _buildHeaders(headers);
       final encodedBody = jsonEncode(body);
       print('[API][POST] URL: $url');
       print('[API][POST] Headers: $usedHeaders');
       print('[API][POST] Body: $encodedBody');
 
       var response = await _getConnect.post(
-        endpoint,
+        normalizedEndpoint,
         encodedBody, // Encode as JSON string
         headers: usedHeaders,
       );
@@ -118,10 +155,12 @@ class ApiClient extends GetxService {
 
         // Avoid infinite loop if the 401 comes from the logout request itself
         // ALSO skip refresh for login/register - 401 here means bad credentials, not expired token
-        if (endpoint.contains('logout') ||
-            endpoint.contains('login') ||
-            endpoint.contains('register')) {
-          print('[API][POST] 401 on $endpoint - skipping refresh logic');
+        if (normalizedEndpoint.contains('logout') ||
+            normalizedEndpoint.contains('login') ||
+            normalizedEndpoint.contains('register')) {
+          print(
+            '[API][POST] 401 on $normalizedEndpoint - skipping refresh logic',
+          );
           // Just return the response so the specific API call can handle the 401
           return _handleResponse<T>(response, converter);
         } else {
@@ -129,13 +168,11 @@ class ApiClient extends GetxService {
           final refreshed = await auth.refreshToken();
           if (refreshed) {
             print('[API][POST] Refresh succeeded, retrying request');
-            // update headers with new token
-            usedHeaders['Authorization'] =
-                'Bearer ${Get.find<StorageService>().token}';
+            final retryHeaders = _buildHeaders(usedHeaders);
             response = await _getConnect.post(
-              endpoint,
+              normalizedEndpoint,
               encodedBody,
-              headers: usedHeaders,
+              headers: retryHeaders,
             );
             print('[API][POST] Retry Status: ${response.statusCode}');
             print('[API][POST] Retry Body: ${response.bodyString}');

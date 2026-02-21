@@ -4,6 +4,9 @@ class SmubTest {
   final String title;
   final String description;
   final String? type;
+  final String? version;
+  final SmubTestPolicy? policy;
+  final SmubTestEligibility? eligibility;
 
   SmubTest({
     required this.id,
@@ -11,15 +14,118 @@ class SmubTest {
     required this.title,
     required this.description,
     this.type,
+    this.version,
+    this.policy,
+    this.eligibility,
   });
 
   factory SmubTest.fromJson(Map<String, dynamic> json) {
+    final rawTitle = json['title'] ?? json['name'] ?? '';
+    final rawSlug = json['slug'] ?? rawTitle.toString().toLowerCase();
+    final rawDescription = json['description'] ?? json['subtitle'] ?? '';
+    final policyJson = json['policy'];
+
     return SmubTest(
       id: json['id'] ?? 0,
-      slug: json['slug'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      type: json['type'],
+      slug: rawSlug
+          .toString()
+          .trim()
+          .replaceAll(RegExp(r'\s+'), '-')
+          .toLowerCase(),
+      title: rawTitle.toString(),
+      description: rawDescription.toString(),
+      type:
+          json['type']?.toString() ??
+          (policyJson is Map<String, dynamic>
+              ? policyJson['type']?.toString()
+              : null),
+      version: json['version']?.toString(),
+      policy: policyJson is Map<String, dynamic>
+          ? SmubTestPolicy.fromJson(policyJson)
+          : null,
+      eligibility: json['eligibility'] is Map<String, dynamic>
+          ? SmubTestEligibility.fromJson(
+              json['eligibility'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
+class SmubTestPolicy {
+  final String? type;
+  final int? questionCount;
+  final int? durationMinutes;
+  final bool? retakeOn;
+  final bool? resultLocked;
+  final String? certModel;
+  final bool? isTimed;
+  final int? retakeMonths;
+  final bool? resultsLocked;
+  final String? certMode;
+
+  SmubTestPolicy({
+    this.type,
+    this.questionCount,
+    this.durationMinutes,
+    this.retakeOn,
+    this.resultLocked,
+    this.certModel,
+    this.isTimed,
+    this.retakeMonths,
+    this.resultsLocked,
+    this.certMode,
+  });
+
+  factory SmubTestPolicy.fromJson(Map<String, dynamic> json) {
+    return SmubTestPolicy(
+      type: json['type']?.toString(),
+      questionCount: json['questionCount'] is int
+          ? json['questionCount'] as int
+          : int.tryParse(json['questionCount']?.toString() ?? ''),
+      durationMinutes: json['durationMinutes'] is int
+          ? json['durationMinutes'] as int
+          : int.tryParse(json['durationMinutes']?.toString() ?? ''),
+      retakeOn: json['retakeOn'] as bool?,
+      resultLocked: (json['resultLocked'] ?? json['resultsLocked']) as bool?,
+      certModel: (json['certModel'] ?? json['certMode'])?.toString(),
+      isTimed: json['isTimed'] as bool?,
+      retakeMonths: json['retakeMonths'] is int
+          ? json['retakeMonths'] as int
+          : int.tryParse(json['retakeMonths']?.toString() ?? ''),
+      resultsLocked: json['resultsLocked'] as bool?,
+      certMode: json['certMode']?.toString(),
+    );
+  }
+}
+
+class SmubTestEligibility {
+  final bool? allowed;
+  final String? reason;
+  final String? reasonText;
+  final String? eligibleAt;
+  final int? blockedSessionId;
+  final String? action;
+
+  SmubTestEligibility({
+    this.allowed,
+    this.reason,
+    this.reasonText,
+    this.eligibleAt,
+    this.blockedSessionId,
+    this.action,
+  });
+
+  factory SmubTestEligibility.fromJson(Map<String, dynamic> json) {
+    return SmubTestEligibility(
+      allowed: json['allowed'] as bool?,
+      reason: json['reason']?.toString(),
+      reasonText: json['reasonText']?.toString(),
+      eligibleAt: json['eligibleAt']?.toString(),
+      blockedSessionId: json['blockedSessionId'] is int
+          ? json['blockedSessionId'] as int
+          : int.tryParse(json['blockedSessionId']?.toString() ?? ''),
+      action: json['action']?.toString(),
     );
   }
 }

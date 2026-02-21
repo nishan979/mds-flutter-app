@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/anti_smub_models.dart';
 import 'api_client.dart';
@@ -5,60 +8,192 @@ import 'api_client.dart';
 class AntiSmubService extends GetxService {
   final ApiClient _client = Get.find<ApiClient>();
 
-  // Fetch all available Anti-SMUB tests (Mock)
+  void _logRequest(String endpoint, {Map<String, dynamic>? body}) {
+    debugPrint('[ANTI_SMUB][REQUEST] endpoint=$endpoint');
+    if (body != null) {
+      debugPrint('[ANTI_SMUB][REQUEST_BODY] ${jsonEncode(body)}');
+    }
+  }
+
+  void _logResponse(String endpoint, dynamic data) {
+    debugPrint('[ANTI_SMUB][RESPONSE] endpoint=$endpoint');
+    debugPrint('[ANTI_SMUB][RESPONSE_BODY] ${jsonEncode(data)}');
+  }
+
+  void _logError(String endpoint, Object error) {
+    debugPrint('[ANTI_SMUB][ERROR] endpoint=$endpoint error=$error');
+  }
+
+  // Fetch all available Anti-SMUB tests
   Future<List<SmubTest>> getTests() async {
-    return []; // Return empty so Controller uses its fallback mock data
-    /*
-    final response = await _client.get<List<SmubTest>>(
-      '/api/v1/anti-smub/tests',
-      converter: (data) {
-        if (data is List) {
-          return data.map((e) => SmubTest.fromJson(e)).toList();
-        }
-        return [];
-      },
-    );
-    return response.data ?? [];
-    */
+    const endpoint = '/api/v1/anti-smub/tests';
+    _logRequest(endpoint);
+
+    try {
+      final response = await _client.get<List<SmubTest>>(
+        endpoint,
+        converter: (data) {
+          if (data is List) {
+            return data
+                .whereType<Map<String, dynamic>>()
+                .map(SmubTest.fromJson)
+                .toList();
+          }
+          return <SmubTest>[];
+        },
+      );
+
+      final tests = response.data ?? <SmubTest>[];
+      _logResponse(endpoint, {
+        'count': tests.length,
+        'items': tests
+            .map(
+              (item) => {
+                'id': item.id,
+                'slug': item.slug,
+                'title': item.title,
+                'type': item.type,
+              },
+            )
+            .toList(),
+      });
+      return tests;
+    } catch (e) {
+      _logError(endpoint, e);
+      print('API Error fetch tests: $e. Using fallback test list.');
+      return <SmubTest>[];
+    }
   }
 
   // Check for an active session
   Future<SmubSession?> getActiveSession() async {
+    const endpoint = '/api/v1/anti-smub/sessions/active';
+    _logRequest(endpoint);
+
     try {
       final response = await _client.get<SmubSession>(
-        '/api/v1/anti-smub/sessions/active',
+        endpoint,
         converter: (data) => SmubSession.fromJson(data),
       );
-      return response.data;
+      final session = response.data;
+      _logResponse(endpoint, {
+        'session': session == null
+            ? null
+            : {
+                'id': session.id,
+                'testId': session.testId,
+                'status': session.status,
+                'createdAt': session.createdAt,
+              },
+      });
+      return session;
     } catch (e) {
+      _logError(endpoint, e);
       // 404 or other errors might mean no active session
       return null;
     }
   }
 
+  // Fetch one Anti-SMUB test by slug/id
+  Future<SmubTest?> getTestBySlug(String slug) async {
+    final endpoint = '/api/v1/anti-smub/tests/$slug';
+    _logRequest(endpoint);
+
+    try {
+      final response = await _client.get<SmubTest>(
+        endpoint,
+        converter: (data) => SmubTest.fromJson(data as Map<String, dynamic>),
+      );
+
+      final test = response.data;
+      _logResponse(endpoint, {
+        'item': test == null
+            ? null
+            : {
+                'id': test.id,
+                'slug': test.slug,
+                'title': test.title,
+                'description': test.description,
+                'version': test.version,
+                'type': test.type,
+              },
+      });
+      return test;
+    } catch (e) {
+      _logError(endpoint, e);
+      rethrow;
+    }
+  }
+
   // Consent to a test (Mock)
   Future<int?> consentToTest(String testSlug) async {
+    const endpoint = '/api/v1/anti-smub/consent';
+    _logRequest(endpoint, body: {'testSlug': testSlug});
+    _logResponse(endpoint, {'consentId': 123, 'mocked': true});
     return 123;
   }
 
   // Start a test (Mock)
   Future<SmubSession?> startTest(String testSlug, int consentId) async {
-    return SmubSession(id: 999, testId: 0, status: 'started');
+    const endpoint = '/api/v1/anti-smub/sessions/start';
+    _logRequest(endpoint, body: {'testSlug': testSlug, 'consentId': consentId});
+
+    final session = SmubSession(id: 999, testId: 0, status: 'started');
+    _logResponse(endpoint, {
+      'id': session.id,
+      'testId': session.testId,
+      'status': session.status,
+      'mocked': true,
+    });
+    return session;
   }
 
   // Get results for a session
   Future<SmubResult?> getSessionResult(int sessionId) async {
+    final endpoint = '/api/v1/anti-smub/sessions/$sessionId/results';
+    _logRequest(endpoint);
+
     final response = await _client.get<SmubResult>(
-      '/api/v1/anti-smub/sessions/$sessionId/results',
+      endpoint,
       converter: (data) => SmubResult.fromJson(data),
     );
-    return response.data;
+    final result = response.data;
+    _logResponse(endpoint, {
+      'result': result == null
+          ? null
+          : {
+              'id': result.id,
+              'sessionId': result.sessionId,
+              'riskLevel': result.riskLevel,
+              'score': result.smubScore,
+              'category': result.category,
+              'metrics': result.metrics,
+            },
+    });
+    return result;
   }
 
   // Get Questions (Mock fallback if API missing)
   Future<List<SmubQuestion>> getQuestions(String testSlug) async {
+    final endpoint = '/api/v1/anti-smub/tests/$testSlug/questions';
+    _logRequest(endpoint);
+
     // For now, bypass API and use mock data directly
-    return _getMockQuestions(testSlug);
+    final questions = _getMockQuestions(testSlug);
+    _logResponse(endpoint, {
+      'count': questions.length,
+      'items': questions
+          .map(
+            (q) => {
+              'id': q.id,
+              'text': q.text,
+              'optionsCount': q.options.length,
+            },
+          )
+          .toList(),
+      'mocked': true,
+    });
+    return questions;
     /*
     try {
       final response = await _client.get<List<SmubQuestion>>(
@@ -83,6 +218,12 @@ class AntiSmubService extends GetxService {
   // Submit Answer (Mock)
   Future<bool> submitAnswer(int sessionId, int questionId, int optionId) async {
     // Mock success
+    final endpoint = '/api/v1/anti-smub/sessions/$sessionId/answers';
+    _logRequest(
+      endpoint,
+      body: {'question_id': questionId, 'option_id': optionId},
+    );
+    _logResponse(endpoint, {'success': true, 'mocked': true});
     return true;
     /*
     try {
@@ -101,8 +242,11 @@ class AntiSmubService extends GetxService {
 
   // Finish Test (Mock)
   Future<SmubResult?> finishTest(int sessionId) async {
+    final endpoint = '/api/v1/anti-smub/sessions/$sessionId/finish';
+    _logRequest(endpoint, body: {'session_id': sessionId});
+
     // Mock result directly
-    return SmubResult(
+    final result = SmubResult(
       id: 101,
       sessionId: sessionId,
       riskLevel: 'Moderate',
@@ -114,6 +258,16 @@ class AntiSmubService extends GetxService {
         'recovery_potential': 7,
       },
     );
+    _logResponse(endpoint, {
+      'id': result.id,
+      'sessionId': result.sessionId,
+      'riskLevel': result.riskLevel,
+      'score': result.smubScore,
+      'category': result.category,
+      'metrics': result.metrics,
+      'mocked': true,
+    });
+    return result;
   }
 
   List<SmubQuestion> _getMockQuestions(String slug) {

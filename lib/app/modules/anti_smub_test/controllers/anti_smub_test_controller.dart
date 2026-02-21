@@ -3,10 +3,11 @@ import 'package:get/get.dart';
 import '../../../../app/services/api/anti_smub_service.dart';
 import '../../../data/models/anti_smub_models.dart';
 import '../views/take_anti_smub_test_view.dart';
-import '../views/full_assessment_details_view.dart';
+import '../views/smub_test_details_view.dart';
 
 class AntiSmubTestController extends GetxController {
   final AntiSmubService _antiSmubService = Get.find<AntiSmubService>();
+  Future<void>? _initialLoadFuture;
 
   final RxList<SmubTest> tests = <SmubTest>[].obs;
   final RxBool isLoading = true.obs;
@@ -32,7 +33,18 @@ class AntiSmubTestController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadData();
+    _initialLoadFuture = _loadData();
+  }
+
+  Future<void> _ensureInitialDataLoaded() async {
+    if (isLoading.value && _initialLoadFuture != null) {
+      await _initialLoadFuture;
+    }
+
+    if (tests.isEmpty) {
+      _initialLoadFuture = _loadData();
+      await _initialLoadFuture;
+    }
   }
 
   Future<void> _loadData() async {
@@ -116,13 +128,30 @@ class AntiSmubTestController extends GetxController {
     }
   }
 
-  void onTileClicked(String typeKey) {
-    if (typeKey == 'full') {
-      Get.to(() => const FullAssessmentDetailsView());
+  Future<void> onTileClicked(String typeKey) async {
+    final normalizedType = typeKey.toLowerCase();
+
+    await _ensureInitialDataLoaded();
+
+    if (normalizedType == 'quick' ||
+        normalizedType == 'focus' ||
+        normalizedType == 'full') {
+      final selectedTest = _findTestForType(normalizedType);
+
+      if (selectedTest != null) {
+        await _openDetailsBySlug(selectedTest);
+      } else {
+        Get.snackbar(
+          'Unavailable',
+          'No test details found for ${normalizedType.capitalizeFirst}.',
+          backgroundColor: Colors.black87,
+          colorText: Colors.white,
+        );
+      }
       return;
     }
 
-    if (typeKey == 'start_full_test_now') {
+    if (normalizedType == 'start_full_test_now') {
       final match = tests.firstWhereOrNull(
         (t) =>
             t.slug.toLowerCase().contains('full') ||
@@ -147,8 +176,8 @@ class AntiSmubTestController extends GetxController {
 
     final match = tests.firstWhereOrNull(
       (t) =>
-          t.slug.toLowerCase().contains(typeKey.toLowerCase()) ||
-          t.title.toLowerCase().contains(typeKey.toLowerCase()),
+          t.slug.toLowerCase().contains(normalizedType) ||
+          t.title.toLowerCase().contains(normalizedType),
     );
 
     if (match != null) {
@@ -158,13 +187,67 @@ class AntiSmubTestController extends GetxController {
       startTest(
         SmubTest(
           id: 0,
-          slug: '$typeKey-test',
-          title: '$typeKey Test',
+          slug: '$normalizedType-test',
+          title: '$normalizedType Test',
           description: '',
-          type: typeKey,
+          type: normalizedType,
         ),
       );
     }
+  }
+
+  Future<void> _openDetailsBySlug(SmubTest selectedTest) async {
+    try {
+      await Get.showOverlay(
+        asyncFunction: () async {
+          final detail = await _antiSmubService.getTestBySlug(
+            selectedTest.slug,
+          );
+          Get.to(() => SmubTestDetailsView(test: detail ?? selectedTest));
+        },
+        loadingWidget: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not load test details. Showing available data.',
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+      );
+      Get.to(() => SmubTestDetailsView(test: selectedTest));
+    }
+  }
+
+  SmubTest? _findTestForType(String typeKey) {
+    final apiOrderedTests = [...tests]..sort((a, b) => a.id.compareTo(b.id));
+    final indexMap = <String, int>{'quick': 0, 'focus': 1, 'full': 2};
+
+    final preferredIndex = indexMap[typeKey];
+    if (preferredIndex != null && apiOrderedTests.length > preferredIndex) {
+      return apiOrderedTests[preferredIndex];
+    }
+
+    final keywordMap = <String, List<String>>{
+      'quick': ['quick', 'pilot', 'pulse', 'screener'],
+      'focus': ['focus', 'attention', 'intermediate'],
+      'full': ['full', 'assessment', 'enterprise', 'corporation'],
+    };
+
+    final keywords = keywordMap[typeKey] ?? [typeKey];
+
+    return tests.firstWhereOrNull((test) {
+      final searchable = [
+        test.slug,
+        test.title,
+        test.description,
+        test.type ?? '',
+        test.policy?.type ?? '',
+      ].join(' ').toLowerCase();
+
+      return keywords.any(searchable.contains);
+    });
   }
 
   Future<void> startTest(SmubTest test) async {
